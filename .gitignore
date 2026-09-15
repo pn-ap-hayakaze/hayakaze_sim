@@ -1,0 +1,22 @@
+# 依存パッケージ
+node_modules/
+
+# ビルド成果物
+dist/
+build/
+*.tsbuildinfo
+
+# 環境・ローカル設定
+.env
+.env.*
+.claude/settings.local.json
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ログ
+*.log
+npm-debug.log*

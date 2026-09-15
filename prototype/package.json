@@ -1,0 +1,19 @@
+{
+  "name": "hayakaze-sim-prototype",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "NPBペナントレースシミュレーション エンジン検証用プロトタイプ",
+  "scripts": {
+    "validate": "tsx scripts/validate.ts",
+    "diag": "tsx scripts/diag.ts",
+    "diag:fatigue": "tsx scripts/diag-fatigue.ts",
+    "diag:bullpen": "tsx scripts/diag-bullpen.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
