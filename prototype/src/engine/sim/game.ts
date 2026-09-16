@@ -21,6 +21,7 @@ import {
   type BattingStats,
   type PitchingStats,
 } from './stats.js';
+import { encodeBases, type PlateAppearanceEvent } from './events.js';
 
 const MAX_INNINGS = 12;
 
@@ -55,6 +56,8 @@ export interface GameResult {
   tie: boolean;
   batting: Map<string, BattingStats>;
   pitching: Map<string, PitchingStats>;
+  /** 打席ごとの記録。RE24・線形ウェイト・WPA の元データ */
+  events: PlateAppearanceEvent[];
 }
 
 /** 攻撃中のチームの可変状態 */
@@ -98,6 +101,7 @@ export function simulateGame(
 
   const batting = new Map<string, BattingStats>();
   const pitching = new Map<string, PitchingStats>();
+  const events: PlateAppearanceEvent[] = [];
 
   const home = createTeamState(homeRoster, homeStarter, dh, condition);
   const away = createTeamState(awayRoster, awayStarter, dh, condition);
@@ -111,12 +115,12 @@ export function simulateGame(
 
   let inning = 1;
   for (; inning <= MAX_INNINGS; inning++) {
-    playHalfInning(away, home, homeTeam, rng, batting, pitching, inning);
+    playHalfInning(away, home, homeTeam, rng, batting, pitching, events, inning, true);
 
     // 9回裏以降、ホームがリードしていれば裏の攻撃は不要（サヨナラ勝ちの逆）
     if (inning >= 9 && home.score > away.score) break;
 
-    playHalfInning(home, away, homeTeam, rng, batting, pitching, inning);
+    playHalfInning(home, away, homeTeam, rng, batting, pitching, events, inning, false);
 
     if (inning >= 9 && home.score !== away.score) break;
   }
@@ -130,6 +134,7 @@ export function simulateGame(
     tie: home.score === away.score,
     batting,
     pitching,
+    events,
   };
 
   assignDecisions(result, home, away, pitching);
@@ -241,7 +246,9 @@ function playHalfInning(
   rng: Rng,
   batting: Map<string, BattingStats>,
   pitching: Map<string, PitchingStats>,
+  events: PlateAppearanceEvent[],
   inning: number,
+  top: boolean,
 ): void {
   const bases: Bases = { first: null, second: null, third: null };
   let outs = 0;
@@ -280,6 +287,14 @@ function playHalfInning(
       }
     }
 
+    // 盗塁の処理が終わった時点の状況を「打席前」として記録する
+    const basesBefore = encodeBases(
+      bases.first !== null,
+      bases.second !== null,
+      bases.third !== null,
+    );
+    const scoreDiffBefore = offense.score - defense.score;
+
     // 得点圏（二塁または三塁に走者）ではクラッチ能力が適用される
     const risp = bases.second !== null || bases.third !== null;
     const fatigue = defense.condition.fatigue(pitcher);
@@ -303,6 +318,7 @@ function playHalfInning(
 
     const runsBefore = offense.score;
     const outsBefore = outs;
+    let reachedOnError = false;
 
     switch (outcome) {
       case 'K':
@@ -361,6 +377,7 @@ function playHalfInning(
         if (rng.chance(errorRate(defLevel.hands))) {
           // 失策。打者は出塁し、走者は1つ進む。アウトは増えない
           bStats.roe += 1;
+          reachedOnError = true;
           errorThisInning = true;
           advanceOnError(bases, batter, offense, batting);
         } else {
@@ -376,6 +393,29 @@ function playHalfInning(
     pStats.er += errorThisInning ? 0 : runsScored;
     // この打席で発生したアウトは、投げていた投手に記録する
     pStats.outs += outs - outsBefore;
+
+    events.push({
+      inning,
+      top,
+      batterId: batter.id,
+      pitcherId: pitcher.id,
+      outcome,
+      reachedOnError,
+      outsBefore,
+      basesBefore,
+      outsAfter: outs,
+      basesAfter: encodeBases(
+        bases.first !== null,
+        bases.second !== null,
+        bases.third !== null,
+      ),
+      runs: runsScored,
+      scoreDiffBefore,
+    });
+
+    // サヨナラ: 9回裏以降にホーム（裏の攻撃側）が勝ち越したら即終了。
+    // 以前は3アウトまで攻撃が続き、決勝点の後に毎シーズン約150打席・30得点が水増しされていた
+    if (!top && inning >= 9 && offense.score > defense.score) break;
   }
 }
 
@@ -570,9 +610,14 @@ function resolveBattedOut(
     const dpChance = 0.26 - (speed - 50) * 0.0022;
     if (rng.chance(Math.min(Math.max(dpChance, 0.08), 0.4))) {
       bases.first = null;
-      if (bases.third) {
-        // 併殺の間に三塁走者が生還するケース
-        if (rng.chance(0.35)) scoreRun(bases.third, offense, batting);
+      // 併殺の間に三塁走者が生還するケース。ゴロ併殺では守備側が二塁・一塁で2つ取るので
+      // 三塁走者はほぼ生還する。35% にしていたときは一塁走者の価値が過小評価され、
+      // RE24 で「無死三塁 ≈ 無死一三塁」という単調性違反が出た。
+      // 併殺で3アウトになる場合（1アウトから）はフォースアウト成立で得点は入らない。
+      // 生還しなければ三塁に残る。以前は無条件に消していて、毎シーズン50〜65人の走者が
+      // アウトにも残塁にもならず盤面から失われていた。
+      if (bases.third && outs === 0 && rng.chance(0.85)) {
+        scoreRun(bases.third, offense, batting);
         bases.third = null;
       }
       return 2;

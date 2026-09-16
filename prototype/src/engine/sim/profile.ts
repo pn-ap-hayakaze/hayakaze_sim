@@ -8,10 +8,14 @@
  * 打者と投手の能力は次のように対になって打ち消し合う:
  *
  *   打者          投手            結果
- *   ミート    ⇄  H/9 (hits)      単打・二塁打
- *   パワー    ⇄  HR/9 (homeRuns) 本塁打
+ *   ミート    ⇄  H/9 (hits)      インプレー安打全般（単打が中心）
+ *   パワー    ⇄  HR/9 (homeRuns) 本塁打を中心に、二塁打・三塁打・単打にも
  *   コンタクト ⇄  K/9 (strikeouts) 三振
  *   選球眼    ⇄  BB/9 (walks)    四球
+ *
+ * ミートは「良い打球を打つ頻度」、パワーは「打球の強さ」。
+ * 強い打球は内野を抜け、外野の間を割り、フェンスを越えるので、
+ * パワーは本塁打だけでなくすべてのインプレー安打に配分する（本塁打 > 三塁打・二塁打 > 単打）。
  *
  * 得点圏（走者二塁または三塁）では、打者はコンタクトの代わりにクラッチを、
  * 投手は H/9 の代わりにクラッチを使う。
@@ -42,11 +46,17 @@ const SLOPE = {
   batterK: -0.23,
   /** 選球眼 → 四球率（上げる） */
   batterBB: 0.25,
-  /** パワー → 本塁打率（上げる）。本塁打は個人差が大きいので傾きも大きい。0.40 では本塁打王が52本 */
-  batterHR: 0.36,
-  /** ミート → 単打・二塁打率（上げる）。0.14 では首位打者が .394 に達した */
+  /**
+   * パワー → 本塁打率（上げる）。本塁打は個人差が大きいので傾きも大きい。
+   * 0.40 では本塁打王が52本。パワーを全安打に配分してからは強打者が積み上がりやすく、
+   * 0.36 でも wRC+ 首位が 214〜223 になったので少し締める
+   */
+  batterHR: 0.33,
+  /** ミート・パワー → 単打率（上げる）。0.14 では首位打者が .394 に達した */
   batterHit: 0.125,
-  /** 走力 → 三塁打率（上げる） */
+  /** ミート・パワー → 二塁打率（上げる）。二塁打は単打より個人差が大きい。0.20 では OPS の散らばりが広すぎた */
+  batterDouble: 0.16,
+  /** 走力・パワー → 三塁打率（上げる） */
   batterTriple: 0.35,
 
   // 投手側の傾きは打者側より緩くする。
@@ -100,10 +110,23 @@ export function batterProfile(
     K: ratingToRate(LEAGUE_AVERAGE.K, kResist, SLOPE.batterK),
     BB: ratingToRate(LEAGUE_AVERAGE.BB, b.eye, SLOPE.batterBB),
     HBP: LEAGUE_AVERAGE.HBP,
-    HR: ratingToRate(LEAGUE_AVERAGE.HR, power * 0.75 + meet * 0.25, SLOPE.batterHR),
-    TRIPLE: ratingToRate(LEAGUE_AVERAGE.TRIPLE, speed * 0.7 + meet * 0.3, SLOPE.batterTriple),
-    DOUBLE: ratingToRate(LEAGUE_AVERAGE.DOUBLE, meet * 0.7 + power * 0.3, SLOPE.batterHit),
-    SINGLE: ratingToRate(LEAGUE_AVERAGE.SINGLE, meet * 0.85 + speed * 0.15, SLOPE.batterHit),
+    // パワーは打球の強さとして全インプレー安打に配分する。本塁打 > 三塁打・二塁打 > 単打
+    HR: ratingToRate(LEAGUE_AVERAGE.HR, power * 0.7 + meet * 0.3, SLOPE.batterHR),
+    TRIPLE: ratingToRate(
+      LEAGUE_AVERAGE.TRIPLE,
+      speed * 0.5 + power * 0.3 + meet * 0.2,
+      SLOPE.batterTriple,
+    ),
+    DOUBLE: ratingToRate(
+      LEAGUE_AVERAGE.DOUBLE,
+      meet * 0.45 + power * 0.45 + speed * 0.1,
+      SLOPE.batterDouble,
+    ),
+    SINGLE: ratingToRate(
+      LEAGUE_AVERAGE.SINGLE,
+      meet * 0.7 + power * 0.15 + speed * 0.15,
+      SLOPE.batterHit,
+    ),
     OUT_IN_PLAY: LEAGUE_AVERAGE.OUT_IN_PLAY,
   };
 }
@@ -133,8 +156,9 @@ export function pitcherProfile(
     // 死球はゾーンに収める力の裏返し
     HBP: ratingToRate(LEAGUE_AVERAGE.HBP, walks, -0.2),
     HR: ratingToRate(LEAGUE_AVERAGE.HR, homeRuns, SLOPE.pitcherHR),
-    TRIPLE: LEAGUE_AVERAGE.TRIPLE,
-    DOUBLE: ratingToRate(LEAGUE_AVERAGE.DOUBLE, hits, SLOPE.pitcherHit),
+    // 打者側でパワーが長打に効くのと鏡映しに、HR/9（打球の力を抑える力）を長打にも効かせる
+    TRIPLE: ratingToRate(LEAGUE_AVERAGE.TRIPLE, hits * 0.7 + homeRuns * 0.3, SLOPE.pitcherHit),
+    DOUBLE: ratingToRate(LEAGUE_AVERAGE.DOUBLE, hits * 0.7 + homeRuns * 0.3, SLOPE.pitcherHit),
     SINGLE: ratingToRate(LEAGUE_AVERAGE.SINGLE, hits, SLOPE.pitcherHit),
     OUT_IN_PLAY: LEAGUE_AVERAGE.OUT_IN_PLAY,
   };

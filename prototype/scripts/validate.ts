@@ -29,6 +29,16 @@ import {
   type PitchingStats,
 } from '../src/engine/sim/stats.js';
 import type { Player } from '../src/engine/player/ratings.js';
+import {
+  battingWar,
+  buildLeagueContext,
+  fip,
+  pitchingWar,
+  woba,
+  wrcPlus,
+} from '../src/engine/metrics/advanced.js';
+import { baseOutIndex } from '../src/engine/sim/events.js';
+import { percentileBar, percentileCard, type MetricSpec } from '../src/engine/metrics/percentile.js';
 
 const seed = Number(process.argv[2] ?? 20260915);
 
@@ -110,6 +120,87 @@ for (const { player, stats } of qualifiedPitchers
   );
 }
 
+// --- セイバーメトリクス ---
+const ctx = buildLeagueContext(season);
+
+console.log('\n=== 得点期待値表（シミュレーション自身から導出）===');
+console.log('走者        0アウト  1アウト  2アウト   (現実の NPB: 無走者0アウト ≈ 0.45、満塁0アウト ≈ 2.2)');
+const baseLabels = ['---', '1--', '-2-', '12-', '--3', '1-3', '-23', '123'];
+for (let bases = 0; bases < 8; bases++) {
+  const cells = [0, 1, 2].map((outs) =>
+    ctx.runExpectancy.expected[baseOutIndex(outs, bases)].toFixed(3).padStart(7),
+  );
+  console.log(`${baseLabels[bases]}      ${cells.join('  ')}`);
+}
+
+console.log('\n=== 線形ウェイト（アウト基準・wOBA尺度）===');
+console.log('結果      得点価値   wOBAウェイト   (現実の MLB: 1B .88 / 2B 1.25 / 3B 1.58 / HR 2.03 / BB .69)');
+const lw = ctx.linearWeights;
+const ww = ctx.wobaWeights;
+row2('単打', lw.SINGLE - ctx.outWeight, ww.single);
+row2('二塁打', lw.DOUBLE - ctx.outWeight, ww.double);
+row2('三塁打', lw.TRIPLE - ctx.outWeight, ww.triple);
+row2('本塁打', lw.HR - ctx.outWeight, ww.hr);
+row2('四球', lw.BB - ctx.outWeight, ww.bb);
+row2('死球', lw.HBP - ctx.outWeight, ww.hbp);
+console.log(`アウトの価値 ${ctx.outWeight.toFixed(3)} / wOBA尺度 ${ctx.wobaScale.toFixed(3)} / リーグwOBA ${fmtRate(ctx.leagueWoba)} / 1勝=${ctx.runsPerWin.toFixed(2)}点 / cFIP ${ctx.cFip.toFixed(2)}`);
+
+console.log('\n=== wRC+ ランキング（規定打席到達）===');
+console.log('選手              球団          wOBA  wRC+   WAR  守備位置');
+for (const { player, stats } of [...qualified]
+  .sort((a, b) => wrcPlus(b.stats, ctx) - wrcPlus(a.stats, ctx))
+  .slice(0, 10)) {
+  console.log(
+    `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+      `${fmtRate(woba(stats, ctx))} ${wrcPlus(stats, ctx).toFixed(0).padStart(5)} ` +
+      `${battingWar(stats, player.primaryPosition, ctx).toFixed(1).padStart(5)}  ${player.primaryPosition}`,
+  );
+}
+
+console.log('\n=== FIP ランキング（規定投球回到達）===');
+console.log('選手              球団          FIP   防御率   WAR');
+for (const { player, stats } of qualifiedPitchers
+  .sort((a, b) => fip(a.stats, ctx) - fip(b.stats, ctx))
+  .slice(0, 10)) {
+  console.log(
+    `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+      `${fip(stats, ctx).toFixed(2).padStart(5)} ${era(stats).toFixed(2).padStart(7)} ${pitchingWar(stats, ctx).toFixed(1).padStart(6)}`,
+  );
+}
+
+// --- パーセンタイル表示（Baseball Savant 風）---
+const regulars = allBatters(season).filter((e) => e.stats.pa >= 300);
+const leader = [...qualified].sort((a, b) => wrcPlus(b.stats, ctx) - wrcPlus(a.stats, ctx))[0];
+if (leader) {
+  console.log(`\n=== パーセンタイル: ${leader.player.name}（${teamById(leader.player.teamId).name} / ${leader.player.primaryPosition}）===`);
+  type Entry = { player: Player; stats: BattingStats };
+  const ratingMetrics: MetricSpec<Entry>[] = [
+    { label: 'ミート', value: (e) => (e.player.ratings.batting.meetVsR + e.player.ratings.batting.meetVsL) / 2 },
+    { label: 'パワー', value: (e) => (e.player.ratings.batting.powerVsR + e.player.ratings.batting.powerVsL) / 2 },
+    { label: 'コンタクト', value: (e) => e.player.ratings.batting.contact },
+    { label: '選球眼', value: (e) => e.player.ratings.batting.eye },
+    { label: 'クラッチ', value: (e) => e.player.ratings.batting.clutch },
+    { label: '走力', value: (e) => e.player.ratings.running.speed },
+    { label: '肩の強さ', value: (e) => e.player.ratings.throwing.armStrength },
+    { label: '守備(主位置)', value: (e) => e.player.ratings.fielding[e.player.primaryPosition] },
+  ];
+  const statMetrics: MetricSpec<Entry>[] = [
+    { label: 'wRC+', value: (e) => wrcPlus(e.stats, ctx), format: (v) => v.toFixed(0) },
+    { label: '本塁打率', value: (e) => e.stats.hr / e.stats.pa, format: (v) => `${(v * 100).toFixed(1)}%` },
+    { label: '四球率', value: (e) => e.stats.bb / e.stats.pa, format: (v) => `${(v * 100).toFixed(1)}%` },
+    { label: '三振率', value: (e) => e.stats.so / e.stats.pa, higherIsBetter: false, format: (v) => `${(v * 100).toFixed(1)}%` },
+    { label: '盗塁', value: (e) => e.stats.sb, format: (v) => String(v) },
+  ];
+  console.log('--- 能力値（規定300打席以上の野手内）---');
+  for (const c of percentileCard(leader, regulars, ratingMetrics)) {
+    console.log(`${c.label.padEnd(8, '　')} ${c.display.padStart(6)}  ${percentileBar(c.percentile)} ${String(c.percentile).padStart(3)}`);
+  }
+  console.log('--- 成績 ---');
+  for (const c of percentileCard(leader, regulars, statMetrics)) {
+    console.log(`${c.label.padEnd(8, '　')} ${c.display.padStart(6)}  ${percentileBar(c.percentile)} ${String(c.percentile).padStart(3)}`);
+  }
+}
+
 // --- 健全性チェック ---
 console.log('\n=== 健全性チェック ===');
 check('全球団が143試合を消化', [...season.records.values()].every(
@@ -122,8 +213,85 @@ check(
   '防御率が 2.80〜3.90 に収まる',
   era(leaguePitching) > 2.8 && era(leaguePitching) < 3.9,
 );
+check(
+  '線形ウェイトの順序が 四球 < 単打 < 二塁打 < 三塁打 < 本塁打',
+  ww.bb < ww.single && ww.single < ww.double && ww.double < ww.triple && ww.triple < ww.hr,
+);
+check(
+  '規定打席到達者の wRC+ の平均が 95〜125（レギュラーは平均より上）',
+  (() => {
+    const m = qualified.reduce((a, e) => a + wrcPlus(e.stats, ctx), 0) / qualified.length;
+    return m > 95 && m < 125;
+  })(),
+);
+
+// --- 試合進行とイベント記録の不変条件 ---
+const allEvents = season.results.flatMap((r) => r.events);
+check(
+  '3アウト目のプレーで得点が入っていない',
+  ctx.runExpectancy.invariantViolations === 0,
+);
+check(
+  'サヨナラ成立後の打席が 0（9回裏以降にホームがリードした状態で打席がない）',
+  allEvents.filter((e) => !e.top && e.inning >= 9 && e.scoreDiffBefore > 0).length === 0,
+);
+check(
+  '併殺で走者が消えない（走者数の保存: 前の走者 = 後の走者 + 得点 + 増えたアウト − 1）',
+  allEvents
+    .filter((e) => e.outcome === 'OUT_IN_PLAY' && !e.reachedOnError && e.outsAfter < 3)
+    .every((e) => {
+      const pop = (b: number) => (b & 1) + ((b >> 1) & 1) + ((b >> 2) & 1);
+      // 打者自身がアウトになる分を差し引く
+      return pop(e.basesBefore) === pop(e.basesAfter) + e.runs + (e.outsAfter - e.outsBefore - 1);
+    }),
+);
+check(
+  `RE24 の全セルに標本が30以上ある（最少 ${Math.min(...ctx.runExpectancy.samples)}）`,
+  Math.min(...ctx.runExpectancy.samples) >= 30,
+);
+check(
+  'RE24 がアウト方向に単調減少・走者方向に単調増加',
+  (() => {
+    const re = ctx.runExpectancy.expected;
+    for (let bases = 0; bases < 8; bases++) {
+      if (!(re[baseOutIndex(0, bases)] > re[baseOutIndex(1, bases)] && re[baseOutIndex(1, bases)] > re[baseOutIndex(2, bases)])) return false;
+    }
+    for (let outs = 0; outs < 3; outs++) {
+      for (let bases = 0; bases < 8; bases++) {
+        for (const bit of [1, 2, 4]) {
+          if (bases & bit) continue;
+          if (!(re[baseOutIndex(outs, bases | bit)] > re[baseOutIndex(outs, bases)])) return false;
+        }
+      }
+    }
+    return true;
+  })(),
+);
+check(
+  `サヨナラで打ち切られた半イニングが RE24 の標本から除外されている（${ctx.runExpectancy.truncatedHalfInnings} 件）`,
+  ctx.runExpectancy.truncatedHalfInnings >= 0,
+);
+
+// --- WAR の配分（FanGraphs: 1000勝/2430試合 を野手57%・投手43%で配る）---
+const totalBatterWar = allBatters(season).reduce(
+  (a, e) => a + battingWar(e.stats, e.player.primaryPosition, ctx),
+  0,
+);
+const totalPitcherWar = allPitchers(season).reduce((a, e) => a + pitchingWar(e.stats, ctx), 0);
+const targetBatter = (570 * totalGames) / 2430;
+const targetPitcher = (430 * totalGames) / 2430;
+console.log(
+  `  野手WAR合計 ${totalBatterWar.toFixed(1)}（目標 ${targetBatter.toFixed(1)}） / ` +
+    `投手WAR合計 ${totalPitcherWar.toFixed(1)}（目標 ${targetPitcher.toFixed(1)}）`,
+);
+check('野手WAR合計が目標の ±10%', Math.abs(totalBatterWar / targetBatter - 1) < 0.1);
+check('投手WAR合計が目標の ±10%', Math.abs(totalPitcherWar / targetPitcher - 1) < 0.1);
 
 // ---------- ヘルパー ----------
+
+function row2(label: string, runs: number, weight: number): void {
+  console.log(`${label.padEnd(5, '　')} ${runs.toFixed(3).padStart(8)} ${weight.toFixed(3).padStart(12)}`);
+}
 
 function row(label: string, actual: string, expected: string): void {
   console.log(`${label.padEnd(14, '　')} ${actual.padStart(12)}     ${expected}`);
