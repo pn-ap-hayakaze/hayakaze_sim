@@ -97,6 +97,7 @@ They are kept for reference after the work is done; new work gets a new director
 - `.steering/20250103-fix-filter-bug/` - bug fix
 - `.steering/20250103-rfct-add-tag/` - refactoring
 - `.steering/20250103-rule-naming-convension/` - rule
+- `.steering/20250103-docs-permanent-documents/` - documents only
 
 ## Development Process
 

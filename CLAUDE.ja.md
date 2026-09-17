@@ -99,6 +99,7 @@
 - `.steering/20250103-fix-filter-bug/` - バグ修正
 - `.steering/20250103-rfct-add-tag/` - リファクタ
 - `.steering/20250103-rule-naming-convension/` - ルール
+- `.steering/20250103-docs-permanent-documents/` - 文書のみ
 
 ## 開発プロセス
 
