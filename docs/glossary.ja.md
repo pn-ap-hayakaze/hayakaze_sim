@@ -38,7 +38,7 @@
 | 支配下（選手） | controlled (player) | `controlled`, `controlledMax` | 球団と契約下にある選手。上限70 |
 | 一軍登録 / 出場選手登録 | active roster registration | `level: 'ACTIVE'`, `register` | 一軍の試合に出場できる。上限31 |
 | ベンチ入り | dugout | `dugout` | 試合日に一軍登録から選ぶ26名 |
-| 二軍 | farm (team) | `level: 'FARM'` | 一軍登録外の支配下選手。シーズン1では簡易層 |
+| 二軍 | farm (team) | `level: 'FARM'` | 一軍登録外の支配下選手。v1では簡易層 |
 | 抹消 / 登録抹消 | deactivation | `deactivate`, `deactivatedOnDay` | 一軍登録から外す。再登録まで10日 |
 | 10日ルール | ten-day rule | `REREGISTRATION_DAYS` | 抹消日を含めて10日目から再登録できる |
 | 投げ抹消 | pitch-and-deactivate | `pitchAndDeactivate` | 先発直後に抹消し、長い間隔で戻す |
@@ -48,7 +48,7 @@
 | 外国人枠 | foreign-player quota | `foreignActive`, `foreignMaxPitchers`, `foreignMaxPositionPlayers` | 一軍登録の外国人選手の上限（既定5、協約4）と投手／野手の内訳 |
 | 外国人区分 | foreign status | `foreignStatus: 'DOMESTIC' \| 'FOREIGN' \| 'FOREIGN_EXEMPT'` | 枠に数えるかどうか |
 | 枠除外 | quota exempt | `'FOREIGN_EXEMPT'` | 枠に数えない外国人選手（例: 日本の高校に3年） |
-| 育成（契約・ドラフト） | developmental (contract / draft) | `ikusei` | シーズン1にはない。用語のみ予約 |
+| 育成（契約・ドラフト） | developmental (contract / draft) | `ikusei` | v1にはない。用語のみ予約 |
 | ドラフト / 新人選手選択会議 | draft | `Draft` | オフシーズンの年1回のアマチュア選択 |
 | 入札抽選 | bidding lottery | `BidRound`, `lottery` | 1巡目: 同時入札、同じ選手に入札した球団間で抽選 |
 | 単独指名 | single bid | `singleBid` | その回で1球団だけが入札した |
@@ -122,7 +122,7 @@
 | ソフトゲート | soft gate | `softGate` | 直近 N 日の登板回数で登板確率を下げる規則 |
 | 完投 | complete game | `completeGame` | 先発が全イニングを投げる |
 | 中6日 | six days' rest | `daysRest` | NPB 標準の先発間隔 |
-| 故障 | injury | `Injury`, `currentInjury` | 離脱日数。シーズン1では部位なし |
+| 故障 | injury | `Injury`, `currentInjury` | 離脱日数。v1では部位なし |
 | 故障歴 | injury history | `health.history` | 今季・昨季・2季前の離脱日数 |
 | 離脱日数 | days out | `daysRemaining`, `daysOut` | 右裾の重い分布 |
 | 球数閾値 | pitch-count threshold | `PITCH_THRESHOLD` | 115〜120球。故障リスクの段差 |
@@ -174,7 +174,7 @@
 | 方針 | policy | `Policy` | GM の常設指示: 球数上限、エースの扱い、走塁 |
 | 架空リーグ | fictional league | `generateGame` | 既定: 実在都市、架空の球団と選手 |
 | 実名データ | real-name data | `importData` | ユーザーが用意。同梱しない |
-| シーズン1 | Season 1 | — | 最初にプレイ可能なリリースの範囲 |
+| v1 | v1 | — | 最初にプレイ可能なリリースの範囲 |
 | 後続フェーズ | later phase | — | 契約、コーチ、二軍シミュレーション、打球層、デスクトップ |
 | 説明可能性 | explainability | — | 表示されるすべての数字が仕組みまで辿れること |
 | 較正目標 | calibration target | — | `product-requirements.md` 第7節の NPB 水準レンジ |

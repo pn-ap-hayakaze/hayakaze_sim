@@ -115,7 +115,7 @@ Coding, naming, styling, testing and Git conventions are in `development-guideli
 ### 4.3 Browser and storage
 
 - Supported: current and previous major versions of Chrome, Edge, Firefox and Safari (desktop); mobile is not a target
-  for Season 1 but layouts must not break at 768 px.
+  for v1 but layouts must not break at 768 px.
 - Storage: IndexedDB with a per-origin quota; a save slot is designed to stay under about 20 MB (functional design
   section 4.3), and the app warns when total usage exceeds half the quota reported by `navigator.storage.estimate()`.
 - No network access after the initial load; no analytics, no external fonts or CDNs (self-hosted assets only).

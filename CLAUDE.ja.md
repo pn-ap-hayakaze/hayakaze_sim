@@ -153,18 +153,23 @@ mkdir -p .steering/[YYYYMMDD]-initial-implementation
 - 永続的ドキュメント（`docs/`）への影響を確認
 - 変更が基本設計に影響する場合は `docs/` を更新
 
-#### 2. ステアリングディレクトリ作成
+#### 2. issue・ブランチ・ステアリングディレクトリの作成
 
-新しい作業用のディレクトリを作成します。
+steering の作業単位1つ = GitHub issue 1つ = ブランチ1つ = プルリクエスト1つ。
+
+1. GitHub issue を作る。タイトル = steering のタイトル、ラベル = 種別（`feat`、`fix`、`rfct`、`rule`、`docs`）、
+   マイルストーン = 作業が属するリリースバージョン（例 `v1`）、本文に steering ディレクトリへのリンク。
+2. `main` から `<種別>/<issue番号>-<タイトル>` の名前でブランチを作り、steering の文書を含むこの作業単位の
+   すべてをそのブランチで行う。
+3. ステアリングディレクトリを作り、`requirements.md` のヘッダに issue 番号を書く（`Issue: #N`）。
 
 ```bash
-mkdir -p .steering/[YYYYMMDD]-[開発タイトル]
+gh issue create --title "..." --label feat --milestone "v1"
+git checkout -b feat/12-add-tag-feature
+mkdir -p .steering/[YYYYMMDD]-[種別]-[開発タイトル]
 ```
 
-**例：**
-```bash
-mkdir -p .steering/20250115-add-tag-feature
-```
+**例外：** steering を伴わない微修正（メモリのノート、文書の誤字修正）は `main` へ直接コミットしてよい。
 
 #### 3. 作業ドキュメント作成
 
@@ -186,6 +191,12 @@ mkdir -p .steering/20250115-add-tag-feature
 `.steering/[YYYYMMDD]-[開発タイトル]/tasklist.md` に基づいて実装を進めます。
 
 #### 6. 品質チェック
+
+#### 7. プルリクエストとマージ
+
+ブランチから `main` へ、本文に `Closes #N` を書いてプルリクエストを開く。ユーザーの承認後に**マージコミット**で
+マージする（squash はしない。`tasklist.md` に記録したコミットハッシュを有効なまま保つため）。PR 番号を
+`tasklist.md` に記録する。
 
 ## ドキュメント管理の原則
 

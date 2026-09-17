@@ -151,18 +151,24 @@ Implement according to `.steering/[YYYYMMDD]-initial-implementation/tasklist.md`
 - Check the impact on the permanent documents (`docs/`)
 - If the change affects the basic design, update `docs/`
 
-#### 2. Create a steering directory
+#### 2. Create an issue, a branch and a steering directory
 
-Create a directory for the new work.
+One steering work unit = one GitHub issue = one branch = one pull request.
+
+1. Create a GitHub issue. Title = the steering title; label = the kind (`feat`, `fix`, `rfct`, `rule`, `docs`);
+   milestone = the release version the work belongs to (e.g. `v1`); body links to the steering directory.
+2. Create a branch from `main` named `<kind>/<issue number>-<title>` and do all work for this unit on it,
+   including the steering documents.
+3. Create the steering directory and write the issue number in the header of `requirements.md` (`Issue: #N`).
 
 ```bash
-mkdir -p .steering/[YYYYMMDD]-[title]
+gh issue create --title "..." --label feat --milestone "v1"
+git checkout -b feat/12-add-tag-feature
+mkdir -p .steering/[YYYYMMDD]-[kind]-[title]
 ```
 
-**Example:**
-```bash
-mkdir -p .steering/20250115-add-tag-feature
-```
+**Exception:** small changes that need no steering (memory notes, typo fixes in documents) may be committed
+directly to `main`.
 
 #### 3. Create the work documents
 
@@ -184,6 +190,12 @@ If the change affects the basic design, update the relevant documents under `doc
 Implement according to `.steering/[YYYYMMDD]-[title]/tasklist.md`.
 
 #### 6. Quality checks
+
+#### 7. Pull request and merge
+
+Open a pull request from the branch to `main` with `Closes #N` in the body. After the user approves, merge with a
+**merge commit** (never squash, so the commit hashes recorded in `tasklist.md` stay valid). Record the PR number in
+`tasklist.md`.
 
 ## Document Management Principles
 

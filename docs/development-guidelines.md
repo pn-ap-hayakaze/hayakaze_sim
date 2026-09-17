@@ -113,12 +113,18 @@ Baseball abbreviations in code follow common sabermetric usage: `pa`, `ab`, `h`,
 
 ## 5. Git Conventions
 
-### 5.1 Branches
+### 5.1 Issues, milestones and branches
 
+- **One steering work unit = one issue = one branch = one pull request.**
+- Milestones are release versions (`v1`, …). Every issue belongs to the milestone of the release scope it serves.
+- The issue is created when the steering directory is created: title = steering title, label = kind (`feat`, `fix`,
+  `rfct`, `rule`, `docs`), body links to the steering directory. `requirements.md` records `Issue: #N` in its header.
 - `main` is always deployable; CI must be green.
-- Work happens on branches named `<kind>/<short-title>` matching the steering directory kind: `feat/registration-rules`,
-  `fix/steal-attempts`, `rfct/engine-types`, `rule/…`, `docs/…`.
-- Merge to `main` by fast-forward or squash after the steering tasklist is complete and the user has approved.
+- Branches are named `<kind>/<issue number>-<short-title>`: `feat/2-initial-implementation`, `fix/7-steal-attempts`,
+  `rule/1-branch-and-issues`. All work of the unit, including its steering documents, is committed on the branch.
+- Merge to `main` through a pull request with a **merge commit** (never squash or rebase, so the commit hashes recorded
+  in `tasklist.md` remain valid) after the steering tasklist is complete and the user has approved.
+- Exception: changes that need no steering (memory notes, typo fixes in documents) may be committed directly to `main`.
 
 ### 5.2 Commits
 
@@ -133,10 +139,12 @@ Baseball abbreviations in code follow common sabermetric usage: `pa`, `ab`, `h`,
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 ```
 
-### 5.3 Pull requests (when used)
+### 5.3 Pull requests
 
-- Title in Japanese; body lists the steering directory, the summary of changes, the test evidence (which asserts, which
-  diag tables), and screenshots for UI changes.
+- One per steering work unit, from its branch to `main`.
+- Title in Japanese; body starts with `Closes #N`, then lists the steering directory, the summary of changes, the test
+  evidence (which asserts, which diag tables), and screenshots for UI changes.
+- Merged only after the user approves, with a merge commit. The PR number is recorded in `tasklist.md`.
 - End the body with:
 
 ```
@@ -145,9 +153,9 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 
 ### 5.4 Steering and documents
 
-- A work unit starts with `.steering/YYYYMMDD-<kind>-<title>/requirements.md`, then `design.md`, then `tasklist.md`,
-  each approved before the next.
-- `tasklist.md` is updated as tasks finish; the final item records the commit hash.
+- A work unit starts with an issue and a branch, then `.steering/YYYYMMDD-<kind>-<title>/requirements.md`, then
+  `design.md`, then `tasklist.md`, each approved before the next.
+- `tasklist.md` is updated as tasks finish; the final items record the commit hashes and the PR number.
 - When a change alters a permanent decision, the `docs/` file and its `.ja.md` twin are updated in the same work unit,
   and the memory notes are updated if the decision is one the assistant relies on.
 

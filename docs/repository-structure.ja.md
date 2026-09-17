@@ -133,7 +133,7 @@ packages/app/
 | 1 | workspace のルートと `packages/engine` を、共通 tsconfig・lint・vitest とともに作る | `engine` で `npm test` が空のスイートを実行する |
 | 2 | `prototype/src/engine/**` をモジュール名を保って `packages/engine/src/**` に移す。型を `types/` に分離。`prototype/src/data` を `src/data` へ | `typecheck` が通る |
 | 3 | `prototype/test/**` を `test/calibration` と `test/determinism` に、`prototype/scripts/**` を `scripts/` に移す | 同じ37件のアサート＋既知の失敗1件で `npm test` が通る。`diag:levels` がシード 20260915 で同じ表を印字する |
-| 4 | シーズン1の機能を各 steering 作業単位に従って `engine` に実装する | 各作業単位の tasklist |
+| 4 | v1の機能を各 steering 作業単位に従って `engine` に実装する | 各作業単位の tasklist |
 | 5 | `prototype/` とその README を削除し、ルートの `README.md` に削除したコミットへの注記を加える | この節の履歴を除き、`docs/` に `prototype/` への参照が残らない |
 
 手順5まで `prototype/` は凍結する。新しい仕組みはそこに足さない。

@@ -59,18 +59,18 @@ Statcast-style percentile displays.
 | Games show batting average and ERA; advanced metrics, if any, are cosmetic | wOBA, wRC+, FIP, WAR and RE24 derived from the simulation's own events |
 | No way to check whether a game's statistics are realistic | Calibration against real NPB levels, documented and testable |
 
-### Not targeted in Season 1
+### Not targeted in v1
 
 - Players who want to control individual at-bats or pitches (action gameplay).
 - Multiplayer or online leagues.
 - Real-name NPB data bundled with the product.
 
-## 3. Scope: Season 1 and Later Phases
+## 3. Scope: v1 and Later Phases
 
-"Season 1" is the first playable release. It is deliberately bounded so that the core loop (season, roster, development,
+"v1" is the first playable release. It is deliberately bounded so that the core loop (season, roster, development,
 scouting, draft) is complete and calibrated before contracts and money are added.
 
-| Area | Season 1 | Later phases |
+| Area | v1 | Later phases |
 |---|---|---|
 | League structure | NPB-conformant default: 12 clubs, 2 leagues of 6, 143 games, interleague, Climax Series, Japan Series. Structure is data, not code | Expansion clubs, league realignment as player options |
 | Designated hitter | DH in both leagues. Mid-game loss of the DH decided by the AI manager | — |
@@ -85,7 +85,7 @@ scouting, draft) is complete and calibrated before contracts and money are added
 | Platform | Browser, fully client-side, GitHub Pages, save in the browser and as an exportable file | Desktop packaging with Tauri |
 | Data | Fictional league generation. Import of real-name data from user-supplied JSON/CSV | — |
 
-## 4. Main Features (Season 1)
+## 4. Main Features (v1)
 
 ### F1. Fictional league generation
 
@@ -125,7 +125,7 @@ defaults (31 active, 26 dugout; the collective-agreement value is 29).
 Foreign players count against a **foreign-player quota** on the active roster: 5 by default (the collective-agreement
 value is 4), with a breakdown limit so that the quota cannot be filled entirely with pitchers or entirely with position
 players. The controlled roster has no foreign-player limit. Players who qualify for exemption (for example three years at
-a Japanese high school) carry an exemption flag and do not count. In Season 1 foreign players exist on the generated
+a Japanese high school) carry an exemption flag and do not count. In v1 foreign players exist on the generated
 rosters and are subject to the quota; acquiring new foreign players arrives with the contract system.
 
 ### F6. Player development and aging
@@ -189,7 +189,7 @@ graph LR
 
 ## 5. Definition of Success
 
-Season 1 is successful when all of the following hold.
+v1 is successful when all of the following hold.
 
 1. **Calibration.** Automated tests over at least six seeded seasons show league-wide levels within the NPB target
    ranges of section 7.1, and the usage, fatigue and roster-movement measures within the ranges of section 7.2.
@@ -212,7 +212,7 @@ Season 1 is successful when all of the following hold.
 - **Language.** The game UI is Japanese. Repository documents are English with Japanese counterparts.
 - **Sustainability.** A hobby-scale project maintained by one developer with an AI assistant. The engine is kept
   independent of the UI so that it can be validated headlessly and later packaged for desktop.
-- **Licence and monetisation.** Not decided. No monetisation is planned for Season 1.
+- **Licence and monetisation.** Not decided. No monetisation is planned for v1.
 
 ## 7. Acceptance Criteria
 
@@ -349,7 +349,7 @@ target widened by a tolerance.
 - FR-4.4 Aging is independent of potential, with individual "resistance to decline" and "professionalism" traits;
   clutch does not age.
 - FR-4.5 Hidden traits (batted-ball tendency, contract preferences, professionalism, sense of timing) exist in the data
-  model in Season 1 even where their systems arrive later.
+  model in v1 even where their systems arrive later.
 - FR-4.6 Every player carries a foreign-player status (domestic / foreign / foreign but exempt from the quota). League
   generation places foreign players on each club's roster in realistic numbers; imported data may set the status directly.
 

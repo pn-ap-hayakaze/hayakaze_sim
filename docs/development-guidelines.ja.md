@@ -113,12 +113,18 @@
 
 ## 5. Git 規約
 
-### 5.1 ブランチ
+### 5.1 issue、マイルストーン、ブランチ
 
+- **steering の作業単位1つ = issue 1つ = ブランチ1つ = プルリクエスト1つ。**
+- マイルストーンはリリースバージョン（`v1`、…）。すべての issue は、それが仕える リリース範囲のマイルストーンに属する。
+- issue は steering ディレクトリを作るときに作る: タイトル = steering のタイトル、ラベル = kind（`feat`、`fix`、
+  `rfct`、`rule`、`docs`）、本文に steering ディレクトリへのリンク。`requirements.md` のヘッダに `Issue: #N` を記録する。
 - `main` は常にデプロイ可能。CI は緑でなければならない。
-- 作業は steering ディレクトリの kind に合わせた `<kind>/<short-title>` のブランチで行う: `feat/registration-rules`、
-  `fix/steal-attempts`、`rfct/engine-types`、`rule/…`、`docs/…`。
-- steering の tasklist が完了しユーザーが承認したら、fast-forward または squash で `main` にマージする。
+- ブランチ名は `<kind>/<issue番号>-<short-title>`: `feat/2-initial-implementation`、`fix/7-steal-attempts`、
+  `rule/1-branch-and-issues`。steering の文書を含む作業単位のすべてをそのブランチにコミットする。
+- steering の tasklist が完了しユーザーが承認したら、プルリクエストで**マージコミット**により `main` にマージする
+  （squash や rebase はしない。`tasklist.md` に記録したコミットハッシュを有効なまま保つため）。
+- 例外: steering を伴わない変更（メモリのノート、文書の誤字修正）は `main` へ直接コミットしてよい。
 
 ### 5.2 コミット
 
@@ -133,10 +139,12 @@
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 ```
 
-### 5.3 プルリクエスト（使う場合）
+### 5.3 プルリクエスト
 
-- タイトルは日本語。本文には steering ディレクトリ、変更の概要、テストの証拠（どのアサート、どの diag の表）、
-  UI 変更ならスクリーンショットを載せる。
+- steering の作業単位ごとに1つ。そのブランチから `main` へ。
+- タイトルは日本語。本文は `Closes #N` で始め、steering ディレクトリ、変更の概要、テストの証拠（どのアサート、
+  どの diag の表）、UI 変更ならスクリーンショットを載せる。
+- ユーザーの承認後にのみ、マージコミットでマージする。PR 番号を `tasklist.md` に記録する。
 - 本文の末尾に:
 
 ```
@@ -145,9 +153,9 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 
 ### 5.4 steering と文書
 
-- 作業単位は `.steering/YYYYMMDD-<kind>-<title>/requirements.md` から始め、次に `design.md`、次に `tasklist.md`。
-  それぞれ承認を得てから次へ。
-- `tasklist.md` はタスクが終わるごとに更新し、最後の項目にコミットハッシュを記録する。
+- 作業単位は issue とブランチから始め、次に `.steering/YYYYMMDD-<kind>-<title>/requirements.md`、次に `design.md`、
+  次に `tasklist.md`。それぞれ承認を得てから次へ。
+- `tasklist.md` はタスクが終わるごとに更新し、最後の項目群にコミットハッシュと PR 番号を記録する。
 - 変更が永続的な決定を変えるときは、同じ作業単位で `docs/` のファイルとその `.ja.md` を更新し、アシスタントが
   依拠する決定であればメモリのノートも更新する。
 
