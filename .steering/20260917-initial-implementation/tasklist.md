@@ -79,20 +79,23 @@ design.md の順序で進める。各タスクの完了条件を満たしたら 
 
 ## 5. CI と最終確認
 
-- [ ] 5-1 push して `check.yml` が緑になる
-  - 記録（実行 URL）:
-- [ ] 5-2 受け入れ条件 1〜12 を requirements.md の番号順に確認し、結果を記録する
-  - 記録:
-- [ ] 5-3 報告をまとめる（`diag:levels` の前後対比、テスト件数、実行時間、文書との食い違い）
+- [x] 5-1 push して `check.yml` が緑になる
+  - 記録（実行 URL）: https://github.com/pn-ap-hayakaze/hayakaze_sim/actions/runs/35197175786（success）
+- [x] 5-2 受け入れ条件 1〜12 を requirements.md の番号順に確認し、結果を記録する
+  - 記録: 1 ルートで typecheck（エラー0）・lint・test（engine 42+1、app 8）・build すべて成功 ✓／2 37件は全部含まれ 42 passed / 1 expected fail ✓／
+    3 diag:levels 6シード行の md5 が移植前後で一致 ✓／4 lib ES2022 のみ、Math.random 挿入で lint 失敗を確認 ✓／
+    5 types/ に 52 宣言、実装間の型 import は rng.ts のみ ✓／6 grep 0 件 ✓／7 Playwright で一致を確認 ✓／8 進捗バー表示中に遷移可 ✓／
+    9 完走 312 ms（UI 込み）✓／10 CI success ✓／11 凍結注記あり ✓／12 docs 4件を英日同時更新 ✓
+- [x] 5-3 報告をまとめる（`diag:levels` の前後対比、テスト件数、実行時間、文書との食い違い）
 - [ ] 5-4 PR を作成する（`Closes #2`、テストの証拠、画面のスクリーンショット）。ユーザーの承認後にマージコミットで
   マージし、PR 番号とマージコミットのハッシュをここに記録する
   - 記録:
 
 ## 報告（完了時に記入）
 
-- `diag:levels` 前後対比:
-- テスト件数:
-- 実行時間:
+- `diag:levels` 前後対比: 6シードすべての行が requirements の基準表と同一（平均 .248 / .316 / .690 / 3.74 / 3.37 / 1.305 / 首位打者 .351 / HR王 33.5 / ERAσ 0.65 / OPSσ .100）
+- テスト件数: engine 42 passed / 1 expected fail（プロトタイプ 37 + serialize 3 + replay 2）、app 8 passed
+- 実行時間: 1日 中央値 0.86 ms（最大 5.5 ms）、1シーズン 141 ms（node）、Worker 経由の完走 312 ms（UI 込み）、セーブ JSON 17.1 MB
 - 文書と実装の食い違い（本作業で直したもの）:
   1. Tailwind v4 は設定を CSS に持つ → repository-structure 1.2 の `tailwind.config.ts, postcss.config.js` を削除（英日）
   2. CSP は `index.html` 固定ではなくビルド時注入。開発サーバーには掛けない → architecture 4.4 を実態に合わせた（英日）
