@@ -166,12 +166,15 @@ function breakingBallQuality(arsenal: Pitch[]): number {
  * 派生には個体差ノイズを乗せる。素材が同じでも結果が同じにはならない。
  *
  * 各素材は 50 を中心に散っているので、結果指標も 50 を中心に組む。
+ *
+ * @param clutch 得点圏での hits の係数の元になる値。素材からは派生させず、独立に引いた値を受け取る
  */
 export function derivePitching(
   rng: Rng,
   arsenal: Pitch[],
   stamina: number,
   recovery: number,
+  clutch: number,
 ): PitchingRatings {
   const speed = aggregateSpeed(arsenal);
   const breakAmount = aggregateBreak(arsenal);
@@ -187,8 +190,6 @@ export function derivePitching(
   const walks = clamp(50 + dControl * 0.85 + dBreak * 0.15 + rng.normal(0, 5));
   const hits = clamp(50 + dBreak * 0.5 + dControl * 0.3 + dSpeed * 0.2 + rng.normal(0, 5));
   const homeRuns = clamp(50 + dSpeed * 0.4 + dControl * 0.4 + dBreak * 0.2 + rng.normal(0, 6));
-  // クラッチは被安打抑止力を中心に、個体差として散らす
-  const clutch = clamp(hits + rng.normal(0, 7));
 
   return {
     hits,

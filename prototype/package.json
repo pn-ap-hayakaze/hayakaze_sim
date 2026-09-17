@@ -9,11 +9,16 @@
     "diag": "tsx scripts/diag.ts",
     "diag:fatigue": "tsx scripts/diag-fatigue.ts",
     "diag:bullpen": "tsx scripts/diag-bullpen.ts",
+    "diag:usage": "tsx scripts/diag-usage.ts",
+    "diag:clutch": "tsx scripts/diag-clutch.ts",
+    "diag:levels": "tsx scripts/diag-levels.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.5.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^5.0.1"
   }
 }

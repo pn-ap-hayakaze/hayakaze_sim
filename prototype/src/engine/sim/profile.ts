@@ -17,8 +17,10 @@
  * 強い打球は内野を抜け、外野の間を割り、フェンスを越えるので、
  * パワーは本塁打だけでなくすべてのインプレー安打に配分する（本塁打 > 三塁打・二塁打 > 単打）。
  *
- * 得点圏（走者二塁または三塁）では、打者はコンタクトの代わりにクラッチを、
- * 投手は H/9 の代わりにクラッチを使う。
+ * 得点圏（走者二塁または三塁）では、打者のミートと投手の H/9 にクラッチの係数 f を掛ける。
+ * f(50) = 1.0 で、置換ではなく乗算。実力が高い選手ほど得点圏での上振れの絶対値が大きい。
+ * 以前の「クラッチでコンタクトを置き換える」方式は、得点圏の選手間分散が実測の 2.5 倍になり、
+ * 階層差とプラトーン差が得点圏で消えていた。
  */
 
 import { LEAGUE_AVERAGE, ratingToRate, type OutcomeRates, PA_OUTCOMES } from './oddsRatio.js';
@@ -73,6 +75,22 @@ const SLOPE = {
   pitcherHit: -0.06,
 } as const;
 
+/**
+ * クラッチ +10 で得点圏の実効ミート（投手は実効 hits）が何倍になるか。
+ *
+ * 較正の根拠（2026-09-16）:
+ *   ミート1点あたりの wOBA 感度は約 1.4 ポイント。クラッチは平均50・σ10 で生成するので、
+ *   0.09 なら真のクラッチ才能に起因する（得点圏 wOBA − 通常 wOBA）の選手間 σ が約 7 wOBA ポイントになる。
+ *   セイバーメトリクスの標準的な推定（The Book）ではクラッチ才能の σ は約 8 wOBA ポイント。
+ *   レビュー時のオフセット案 meet + 0.35×(clutch−50) は σ≈5 で届かない。
+ */
+export const CLUTCH_GAIN_PER_10 = 0.09;
+
+/** 得点圏でミート／hits に掛ける係数。f(50) = 1.0。線形なので分布の平均が50なら E[f] = 1 で得点が保存される */
+export function clutchFactor(clutch: number): number {
+  return 1 + (CLUTCH_GAIN_PER_10 * (clutch - 50)) / 10;
+}
+
 /** 合計を1に正規化する */
 function normalize(rates: OutcomeRates): OutcomeRates {
   let total = 0;
@@ -97,14 +115,13 @@ export function batterProfile(
   risp: boolean,
 ): OutcomeRates {
   const b = batter.ratings.batting;
-  const meet = meetAgainst(b, pitcherThrows);
+  // 得点圏ではミートにクラッチの係数が掛かる
+  const meet = meetAgainst(b, pitcherThrows) * (risp ? clutchFactor(b.clutch) : 1);
   const power = powerAgainst(b, pitcherThrows);
   const speed = batter.ratings.running.speed;
-  // 得点圏ではクラッチがコンタクト力になる
-  const contact = risp ? b.clutch : b.contact;
 
   // 選球眼は三振回避にも部分的に寄与する（見極めて追い込まれない）
-  const kResist = contact * 0.8 + b.eye * 0.2;
+  const kResist = b.contact * 0.8 + b.eye * 0.2;
 
   return {
     K: ratingToRate(LEAGUE_AVERAGE.K, kResist, SLOPE.batterK),
@@ -132,7 +149,7 @@ export function batterProfile(
 }
 
 /**
- * 投手の被結果率プロファイル。得点圏では H/9 の代わりにクラッチを使う。
+ * 投手の被結果率プロファイル。得点圏では H/9 にクラッチの係数が掛かる（打者側と対称）。
  *
  * @param fatiguePenalty 疲労による能力値の減少量。疲労度 × 0.15 程度を想定。
  *                       疲れた投手は球威と制球の両方が落ちる
@@ -145,7 +162,7 @@ export function pitcherProfile(
   const p = pitcher.ratings.pitching;
   if (!p) throw new Error(`投手能力を持たない選手が登板しました: ${pitcher.id}`);
 
-  const hits = (risp ? p.clutch : p.hits) - fatiguePenalty;
+  const hits = p.hits * (risp ? clutchFactor(p.clutch) : 1) - fatiguePenalty;
   const strikeouts = p.strikeouts - fatiguePenalty;
   const walks = p.walks - fatiguePenalty;
   const homeRuns = p.homeRuns - fatiguePenalty;

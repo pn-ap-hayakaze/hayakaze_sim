@@ -6,13 +6,14 @@
  * advanceOneDay() の呼び出し回数が違うだけにする。挙動の乖離を防ぐため。
  */
 
-import { Rng } from '../rng.js';
+import { createRngStreams, deriveSeed, RNG_PURPOSE, type RngStreams } from '../rng.js';
 import { generateLeague, type Roster } from '../player/generate.js';
 import { generateSchedule, groupByDay, type ScheduledGame } from './schedule.js';
 import { rotationFor } from './lineup.js';
 import { simulateGame, type GameResult, type PitcherCondition } from '../sim/game.js';
 import type { Player } from '../player/ratings.js';
-import { teamById } from '../../data/teams.js';
+import { NPB_DEFAULT_CONFIG, type Team } from '../../data/teams.js';
+import { leagueOf, validateConfig, type LeagueConfig } from './config.js';
 import {
   addBatting,
   addPitching,
@@ -58,13 +59,22 @@ const FATIGUE_PER_PITCH = 0.7;
  * 以前はスタミナで回復を決めていたが、スタミナは「1試合で投げられる球数」であり
  * 日々の回復とは別の特性。混ぜると、能力もスタミナも高い救援だけが毎日選ばれた。
  */
-function dailyRecovery(p: Player): number {
+export function dailyRecovery(p: Player): number {
   const recovery = p.ratings.pitching?.recovery ?? 50;
   return 10 + recovery * 0.2;
 }
 
 export interface SeasonState {
-  rng: Rng;
+  /** すべての乱数ストリームの根。セーブデータに保存する値 */
+  masterSeed: number;
+  /** シーズン年。試合用乱数の派生キーの一部 */
+  year: number;
+  /** 用途別・試合別の乱数。試合ごとに game(year, day, gameId) で払い出す */
+  streams: RngStreams;
+  /** リーグ構成。DH の有無・試合数・順位表はここから導出する */
+  config: LeagueConfig;
+  /** 球団ID → 球団 */
+  teams: Map<string, Team>;
   rosters: Map<string, Roster>;
   schedule: ScheduledGame[];
   scheduleByDay: Map<number, ScheduledGame[]>;
@@ -83,15 +93,30 @@ export interface SeasonState {
   results: GameResult[];
 }
 
-export function createSeason(seed: number): SeasonState {
+export interface SeasonOptions {
+  /** シーズン年（既定 1） */
+  year?: number;
+  /** 乱数ストリームの差し替え口。テストで特定の試合の乱数消費を変えるために使う */
+  streams?: RngStreams;
+  /** リーグ構成（既定は NPB 準拠・両リーグ DH） */
+  config?: LeagueConfig;
+}
+
+export function createSeason(seed: number, options: SeasonOptions = {}): SeasonState {
+  const year = options.year ?? 1;
+  const streams = options.streams ?? createRngStreams(seed);
+  const config = options.config ?? NPB_DEFAULT_CONFIG;
+  validateConfig(config);
+
+  const teams = new Map<string, Team>(config.teams.map((t) => [t.id, t]));
   const rosters = new Map<string, Roster>();
   const players = new Map<string, Player>();
-  for (const roster of generateLeague(seed)) {
+  for (const roster of generateLeague(deriveSeed(seed, RNG_PURPOSE.ROSTER), config.teams)) {
     rosters.set(roster.team.id, roster);
     for (const p of [...roster.batters, ...roster.pitchers]) players.set(p.id, p);
   }
 
-  const schedule = generateSchedule(seed + 1);
+  const schedule = generateSchedule(deriveSeed(seed, RNG_PURPOSE.SCHEDULE, year), config);
   const records = new Map<string, TeamRecord>();
   const gamesPlayed = new Map<string, number>();
   for (const teamId of rosters.keys()) {
@@ -107,7 +132,11 @@ export function createSeason(seed: number): SeasonState {
   }
 
   return {
-    rng: new Rng(seed + 2),
+    masterSeed: seed,
+    year,
+    streams,
+    config,
+    teams,
     rosters,
     schedule,
     scheduleByDay: groupByDay(schedule),
@@ -167,14 +196,20 @@ export function advanceOneDay(season: SeasonState): GameResult[] {
     const homeStarter = rotationFor(homeRoster, season.gamesPlayed.get(game.homeTeamId)!);
     const awayStarter = rotationFor(awayRoster, season.gamesPlayed.get(game.awayTeamId)!);
 
+    // 試合ごとに独立した乱数。他の試合の乱数消費に影響されない
+    const rng = season.streams.game(season.year, game.day, game.id);
+    const homeTeam = season.teams.get(game.homeTeamId)!;
+    // DH の有無は本拠地のリーグの設定に従う
+    const rules = { dh: leagueOf(season.config, game.homeTeamId).dh };
     const result = simulateGame(
       homeRoster,
       awayRoster,
       homeStarter,
       awayStarter,
-      teamById(game.homeTeamId),
-      season.rng,
+      homeTeam,
+      rng,
       condition,
+      rules,
     );
 
     applyResult(season, result);
@@ -253,9 +288,9 @@ export function winPct(record: TeamRecord): number {
 }
 
 /** リーグ順位表 */
-export function standings(season: SeasonState, league: 'CENTRAL' | 'PACIFIC'): TeamRecord[] {
+export function standings(season: SeasonState, leagueId: string): TeamRecord[] {
   return [...season.records.values()]
-    .filter((r) => teamById(r.teamId).league === league)
+    .filter((r) => season.teams.get(r.teamId)!.league === leagueId)
     .sort((a, b) => winPct(b) - winPct(a));
 }
 

@@ -6,7 +6,10 @@
  * 実名でプレイしたい場合は data/ 配下に外部データを差し込む想定。
  */
 
-export type LeagueId = 'CENTRAL' | 'PACIFIC';
+import type { LeagueConfig } from '../engine/league/config.js';
+
+/** リーグID。リーグ構成は設定で変えられるのでリテラル型にしない */
+export type LeagueId = string;
 
 export interface Team {
   id: string;
@@ -143,7 +146,16 @@ export function teamById(id: string): Team {
   return team;
 }
 
-/** パ・リーグは指名打者制 */
-export function usesDh(league: LeagueId): boolean {
-  return league === 'PACIFIC';
-}
+/**
+ * シーズン1の既定リーグ構成。NPB 準拠だが、指名打者は両リーグで採用する（設計決定）。
+ * 同一リーグ 25試合 × 5球団 + 交流戦 3試合 × 6球団 = 143試合。
+ */
+export const NPB_DEFAULT_CONFIG: LeagueConfig = {
+  teams: TEAMS,
+  leagues: [
+    { id: 'CENTRAL', name: 'セントラル・リーグ', dh: true },
+    { id: 'PACIFIC', name: 'パシフィック・リーグ', dh: true },
+  ],
+  gamesVsSameLeague: 25,
+  gamesVsOtherLeague: 3,
+};

@@ -10,8 +10,9 @@
 
 import { Rng } from '../rng.js';
 import { derivePitching, generateArsenal } from './arsenal.js';
+import { drawClutch } from './clutch.js';
 import { GIVEN_NAMES, SURNAMES } from '../../data/names.js';
-import { TEAMS, type Team } from '../../data/teams.js';
+import type { Team } from '../../data/teams.js';
 import {
   POSITIONS,
   type BatSide,
@@ -209,7 +210,8 @@ function generateBatter(
         powerVsL: clamp(powerBase + (sameSideIsR ? platoonPower : -platoonPower) / 2),
         contact: draw(rng, talent, profile.meet * 0.5),
         eye: draw(rng, talent, 0, 11),
-        clutch: draw(rng, talent, profile.meet * 0.5, 11),
+        // クラッチは階層・ミートと独立（設計決定）。上側の裾が薄い分布
+        clutch: drawClutch(rng),
       },
       running: {
         speed: draw(rng, talent, profile.speed, 11),
@@ -250,7 +252,8 @@ function generatePitcher(
   const recovery = rng.rating(50 + (durability - 50) * 0.3, 10);
 
   const arsenal = generateArsenal(rng, talent, fastballSpeed, throws);
-  const pitching = derivePitching(rng, arsenal, stamina, recovery);
+  // 投手のクラッチも hits と独立に引く（打者側と対称）
+  const pitching = derivePitching(rng, arsenal, stamina, recovery, drawClutch(rng));
 
   return {
     id,
@@ -270,7 +273,8 @@ function generatePitcher(
         powerVsL: rng.rating(18, 8, 1, 55),
         contact: rng.rating(22, 9, 1, 60),
         eye: rng.rating(25, 9, 1, 60),
-        clutch: rng.rating(22, 9, 1, 60),
+        // クラッチは係数（f(50)=1）なので、打撃の低い投手にも平均50の分布をそのまま与える
+        clutch: drawClutch(rng),
       },
       running: {
         speed: rng.rating(38, 11),
@@ -305,18 +309,18 @@ export interface Roster {
 }
 
 /**
- * 全12球団のロスターを生成する。
+ * 全球団のロスターを生成する。球団リストはリーグ設定から受け取る。
  * 球団ごとに戦力補正をかけ、順位争いが生まれるようにする。
  */
-export function generateLeague(seed: number): Roster[] {
+export function generateLeague(seed: number, teams: readonly Team[]): Roster[] {
   const rng = new Rng(seed);
   const names = new NamePool(rng);
 
   // 球団間の戦力差。全選手に一律で乗るため、値が大きいと順位が固定化する。
   // 標準偏差3.5で試したところ勝率.874と.105の球団が生まれた。
-  const teamStrengths = TEAMS.map(() => rng.normal(0, 1.0));
+  const teamStrengths = teams.map(() => rng.normal(0, 1.0));
 
-  return TEAMS.map((team, teamIndex) => {
+  return teams.map((team, teamIndex) => {
     const strength = teamStrengths[teamIndex];
     const batters: Player[] = [];
     const pitchers: Player[] = [];

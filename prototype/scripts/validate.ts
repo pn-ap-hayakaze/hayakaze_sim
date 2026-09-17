@@ -7,7 +7,7 @@
  * engine/sim/oddsRatio.ts の LEAGUE_AVERAGE を調整する。
  */
 
-import { teamById } from '../src/data/teams.js';
+import { gamesPerTeam } from '../src/engine/league/config.js';
 import {
   advanceToEnd,
   createSeason,
@@ -24,6 +24,8 @@ import {
   obp,
   ops,
   slg,
+  sumBatting,
+  sumPitching,
   whip,
   type BattingStats,
   type PitchingStats,
@@ -55,12 +57,15 @@ console.log(
     `(1試合あたり ${((finished - generated) / totalGames).toFixed(2)}ms)`,
 );
 
+const teamById = (id: string) => season.teams.get(id)!;
+/** 1球団の年間試合数。全球団が同数の前提で先頭球団から導出する */
+const gamesPerSeason = gamesPerTeam(season.config, season.config.teams[0].id);
+
 // --- 順位表 ---
-for (const league of ['CENTRAL', 'PACIFIC'] as const) {
-  const label = league === 'CENTRAL' ? 'セントラル・リーグ' : 'パシフィック・リーグ';
-  console.log(`\n=== ${label} ===`);
+for (const league of season.config.leagues) {
+  console.log(`\n=== ${league.name}${league.dh ? '（DH制）' : ''} ===`);
   console.log('順位 球団           試合  勝  敗 分   勝率   差   得点  失点');
-  const table = standings(season, league);
+  const table = standings(season, league.id);
   table.forEach((r, i) => {
     const team = teamById(r.teamId);
     const g = r.wins + r.losses + r.ties;
@@ -74,8 +79,8 @@ for (const league of ['CENTRAL', 'PACIFIC'] as const) {
 }
 
 // --- リーグ全体の打撃成績 ---
-const leagueBatting = sumBatting(season);
-const leaguePitching = sumPitching(season);
+const leagueBatting = sumBatting(season.battingStats.values());
+const leaguePitching = sumPitching(season.pitchingStats.values());
 const pa = leagueBatting.pa;
 
 console.log('\n=== リーグ全体の水準（現実のNPBとの比較）===');
@@ -106,7 +111,7 @@ printBatters(allBatters(season).sort((a, b) => b.stats.sb - a.stats.sb).slice(0,
 
 console.log('\n=== 防御率ランキング（規定投球回到達）===');
 const qualifiedPitchers = allPitchers(season).filter(
-  (p) => p.stats.outs >= 143 * 3,
+  (p) => p.stats.outs >= gamesPerSeason * 3,
 );
 console.log('選手              球団         登板  勝  敗  投球回  防御率  奪三振  WHIP');
 for (const { player, stats } of qualifiedPitchers
@@ -153,7 +158,7 @@ for (const { player, stats } of [...qualified]
   console.log(
     `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
       `${fmtRate(woba(stats, ctx))} ${wrcPlus(stats, ctx).toFixed(0).padStart(5)} ` +
-      `${battingWar(stats, player.primaryPosition, ctx).toFixed(1).padStart(5)}  ${player.primaryPosition}`,
+      `${battingWar(stats, ctx).toFixed(1).padStart(5)}  ${player.primaryPosition}`,
   );
 }
 
@@ -203,8 +208,8 @@ if (leader) {
 
 // --- 健全性チェック ---
 console.log('\n=== 健全性チェック ===');
-check('全球団が143試合を消化', [...season.records.values()].every(
-  (r) => r.wins + r.losses + r.ties === 143,
+check(`全球団が${gamesPerSeason}試合を消化`, [...season.records.values()].every(
+  (r) => r.wins + r.losses + r.ties === gamesPerTeam(season.config, r.teamId),
 ));
 check('リーグ全体の得失点が一致', leagueTotalsBalance(season));
 check('規定打席到達者が各球団2人以上', qualified.length >= 24);
@@ -274,7 +279,7 @@ check(
 
 // --- WAR の配分（FanGraphs: 1000勝/2430試合 を野手57%・投手43%で配る）---
 const totalBatterWar = allBatters(season).reduce(
-  (a, e) => a + battingWar(e.stats, e.player.primaryPosition, ctx),
+  (a, e) => a + battingWar(e.stats, ctx),
   0,
 );
 const totalPitcherWar = allPitchers(season).reduce((a, e) => a + pitchingWar(e.stats, ctx), 0);
@@ -305,36 +310,6 @@ function check(label: string, ok: boolean): void {
   console.log(`  ${ok ? '✓' : '✗'} ${label}`);
 }
 
-function sumBatting(s: SeasonState): BattingStats {
-  const total = { ...emptyLike() };
-  for (const stats of s.battingStats.values()) {
-    for (const key of Object.keys(total) as (keyof BattingStats)[]) {
-      total[key] += stats[key];
-    }
-  }
-  return total;
-}
-
-function emptyLike(): BattingStats {
-  return {
-    g: 0, pa: 0, ab: 0, h: 0, double: 0, triple: 0, hr: 0,
-    bb: 0, hbp: 0, so: 0, r: 0, rbi: 0, sb: 0, cs: 0, roe: 0,
-  };
-}
-
-function sumPitching(s: SeasonState): PitchingStats {
-  const total: PitchingStats = {
-    g: 0, gs: 0, outs: 0, bf: 0, h: 0, hr: 0, bb: 0,
-    hbp: 0, so: 0, pitches: 0, r: 0, er: 0, w: 0, l: 0, sv: 0, hld: 0,
-  };
-  for (const stats of s.pitchingStats.values()) {
-    for (const key of Object.keys(total) as (keyof PitchingStats)[]) {
-      total[key] += stats[key];
-    }
-  }
-  return total;
-}
-
 function findPlayer(s: SeasonState, playerId: string): Player {
   for (const roster of s.rosters.values()) {
     const found =
@@ -360,7 +335,7 @@ function allPitchers(s: SeasonState): { player: Player; stats: PitchingStats }[]
 
 /** 規定打席 = チーム試合数 × 3.1 */
 function qualifiedBatters(s: SeasonState, _totalGames: number) {
-  return allBatters(s).filter((e) => e.stats.pa >= 143 * 3.1);
+  return allBatters(s).filter((e) => e.stats.pa >= gamesPerSeason * 3.1);
 }
 
 function printBatters(entries: { player: Player; stats: BattingStats }[]): void {

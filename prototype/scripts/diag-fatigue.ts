@@ -5,14 +5,14 @@
  *
  * 先発は登板時に疲労0（完全回復）であるべき。救援の登板時疲労は90%点で30前後が目安。
  * 中央値が30を超えたらブルペン全体が慢性疲労で、回復か需要のどちらかがおかしい。
+ *
+ * 回復量は season.ts の dailyRecovery をそのまま使う。以前は式を写していて、
+ * 実体（10 + 回復×0.2）と写し（10 + スタミナ×0.25）が食い違い、診断が誤った数字を出していた。
  */
-import { advanceOneDay, createSeason, isSeasonOver } from '../src/engine/league/season.js';
+import { advanceOneDay, createSeason, dailyRecovery, isSeasonOver } from '../src/engine/league/season.js';
 import { rotationFor } from '../src/engine/league/lineup.js';
-import type { Player } from '../src/engine/player/ratings.js';
 
 const season = createSeason(Number(process.argv[2] ?? 20260915));
-// season.ts の dailyRecovery と同じ式（診断用に写している）
-const recovery = (p: Player) => 10 + (p.ratings.pitching?.stamina ?? 40) * 0.25;
 
 const spFatigueAtStart: number[] = [];
 const rpFatigueAtEntry: number[] = [];
@@ -23,10 +23,8 @@ while (!isSeasonOver(season)) {
   const preGame = new Map<string, number>();
   for (const [id, st] of season.pitcherFatigue) {
     const p = season.players.get(id)!;
-    preGame.set(id, Math.max(0, st.fatigue - recovery(p)));
+    preGame.set(id, Math.max(0, st.fatigue - dailyRecovery(p)));
   }
-  const gBefore = new Map<string, number>();
-  for (const [id, s] of season.pitchingStats) gBefore.set(id, s.g);
 
   const todaysGames = season.scheduleByDay.get(season.currentDay) ?? [];
   for (const g of todaysGames) {

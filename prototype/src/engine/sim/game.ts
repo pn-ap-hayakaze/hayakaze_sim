@@ -12,7 +12,6 @@ import type { Roster } from '../player/generate.js';
 import type { Player, Position } from '../player/ratings.js';
 import { buildLineup, bullpen, pitcherValue, type Lineup } from '../league/lineup.js';
 import type { Team } from '../../data/teams.js';
-import { usesDh } from '../../data/teams.js';
 import { applyFielding, applyParkFactor, batterProfile, pitcherProfile } from './profile.js';
 import { combine, sampleOutcome, type PaOutcome } from './oddsRatio.js';
 import {
@@ -38,6 +37,15 @@ export interface PitcherCondition {
 export const ALL_FRESH: PitcherCondition = {
   fatigue: () => 0,
 };
+
+/**
+ * この試合に適用するルール。リーグ設定から季節側が決めて渡す。
+ * 試合シミュレーションはリーグの存在を知らない
+ */
+export interface GameRules {
+  /** 指名打者制 */
+  dh: boolean;
+}
 
 /** この疲労度以上の投手は登板させない。体力の限界であり、連投日数のルールではない */
 const FATIGUE_UNAVAILABLE = 60;
@@ -94,10 +102,10 @@ export function simulateGame(
   awayStarter: Player,
   homeTeam: Team,
   rng: Rng,
-  condition: PitcherCondition = ALL_FRESH,
+  condition: PitcherCondition,
+  rules: GameRules,
 ): GameResult {
-  // 本拠地球場のリーグでDHの有無が決まる
-  const dh = usesDh(homeTeam.league);
+  const dh = rules.dh;
 
   const batting = new Map<string, BattingStats>();
   const pitching = new Map<string, PitchingStats>();
@@ -108,6 +116,10 @@ export function simulateGame(
 
   for (const state of [home, away]) {
     for (const p of state.lineup.order) statLine(batting, p.id).g += 1;
+    // 出場した枠を記録する。守備位置補正はこの内訳で按分する
+    for (const [pos, p] of state.lineup.defense) statLine(batting, p.id).appearances[pos] += 1;
+    if (state.lineup.dh) statLine(batting, state.lineup.dh.id).appearances.DH += 1;
+    else statLine(batting, state.startingPitcher.id).appearances.P += 1;
     const sp = statLine2(pitching, state.startingPitcher.id);
     sp.g += 1;
     sp.gs += 1;
