@@ -23,8 +23,10 @@
  * 階層差とプラトーン差が得点圏で消えていた。
  */
 
-import { LEAGUE_AVERAGE, ratingToRate, type OutcomeRates, PA_OUTCOMES } from './oddsRatio.js';
-import { meetAgainst, powerAgainst, type Handedness, type Player } from '../player/ratings.js';
+import { LEAGUE_AVERAGE, ratingToRate } from './oddsRatio.js';
+import { meetAgainst, powerAgainst } from '../player/ratings.js';
+import type { Handedness, Player } from '../types/player.js';
+import { PA_OUTCOMES, type OutcomeRates } from '../types/stats.js';
 
 /**
  * 能力値がオッズに与える傾き（能力値+10 あたりの対数オッズ増分）。

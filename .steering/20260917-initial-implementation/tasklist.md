@@ -31,19 +31,19 @@ design.md の順序で進める。各タスクの完了条件を満たしたら 
   import パスを直す
   - 完了条件（改名前の中間確認）: `npm test -w packages/engine` が 37＋1、`diag:levels` が基準表と同一
   - 記録: 37 passed / 1 expected fail。diag:levels は6シード全行が基準表と一致。typecheck・lint 緑。修正した import は teams.ts の config パス1件と、scripts/test のパス。prettier で37ファイルを整形（空白のみ）
-- [ ] 2-4 型を `src/types/` に分離する（`player.ts`、`club.ts`、`game.ts`、`stats.ts`）。design 2.1 の対応表どおり。
+- [x] 2-4 型を `src/types/` に分離する（`player.ts`、`club.ts`、`game.ts`、`stats.ts`）。design 2.1 の対応表どおり。
   実装モジュール間の型 import をなくす
-- [ ] 2-5 `Team` → `Club` 系の改名（design 2.2 の表）。`teams.ts` → `clubs.ts`
+- [x] 2-5 `Team` → `Club` 系の改名（design 2.2 の表）。`teams.ts` → `clubs.ts`
   - 完了条件: `grep -rn "Team\b\|teamId\|TEAMS" packages/engine/src packages/engine/test packages/engine/scripts` が 0 件
-- [ ] 2-6 `src/index.ts` に公開面を作る（design 2.3）
-- [ ] 2-7 `src/save/serialize.ts`（`SAVE_VERSION = 1`、`serializeSeason`、`deserializeSeason`）と
+- [x] 2-6 `src/index.ts` に公開面を作る（design 2.3）
+- [x] 2-7 `src/save/serialize.ts`（`SAVE_VERSION = 1`、`serializeSeason`、`deserializeSeason`）と
   `test/unit/save/serialize.test.ts`（30日進めて直列化→復元→残りを進めた結果が通しと完全一致）
-- [ ] 2-8 `test/determinism/replay.test.ts`（同一シード2回実行で順位表と全成績が一致）
-- [ ] 2-9 lint の動作確認: `src/rng.ts` に `Math.random()` を1行足して `npm run lint` が失敗することを確認し、戻す
-  - 記録:
+- [x] 2-8 `test/determinism/replay.test.ts`（同一シード2回実行で順位表と全成績が一致）
+- [x] 2-9 lint の動作確認: `src/rng.ts` に `Math.random()` を1行足して `npm run lint` が失敗することを確認し、戻す
+  - 記録: `no-restricted-properties` で「エンジン内では Math.random() を使わず、引数で受け取った Rng を使う」のエラーになり失敗を確認。戻して lint 緑
   - 完了条件（改名後の最終確認）: `npm test -w packages/engine` が 37＋1＋新規（serialize 1、replay 1）、
     `diag:levels` が基準表と同一、`typecheck`（`tsconfig.json` と `tsconfig.scripts.json` の両方）と `lint` が緑
-  - 記録:
+  - 記録: 42 passed / 1 expected fail（37 + serialize 3 + replay 2）。diag:levels の6シード行の md5 は改名前 df695f61… と一致。typecheck 両方・lint 緑。型は types/{player,club,stats,game}.ts に 52 宣言を集約。実装モジュール間の型 import は rng.ts の Rng/RngStreams のみ（設計どおりの例外）
 
 ## 3. `packages/app` の骨格
 

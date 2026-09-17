@@ -6,24 +6,14 @@
  * リーグ平均の分布（LEAGUE_AVERAGE）や走塁モデルを変えれば、ウェイトも自動で追従する。
  */
 
-import { baseOutIndex, type PlateAppearanceEvent } from '../sim/events.js';
-import type { GameResult } from '../sim/game.js';
-import type { PaOutcome } from '../sim/oddsRatio.js';
-
-/** 線形ウェイトを持つ結果。失策出塁は打席結果とは別に扱う */
-export type LinearWeightOutcome = PaOutcome | 'ROE';
-
-export const LINEAR_WEIGHT_OUTCOMES: readonly LinearWeightOutcome[] = [
-  'K',
-  'BB',
-  'HBP',
-  'HR',
-  'TRIPLE',
-  'DOUBLE',
-  'SINGLE',
-  'OUT_IN_PLAY',
-  'ROE',
-];
+import { baseOutIndex } from '../sim/events.js';
+import {
+  LINEAR_WEIGHT_OUTCOMES,
+  type LinearWeightOutcome,
+  type PlateAppearanceEvent,
+  type RunExpectancyTable,
+} from '../types/stats.js';
+import type { GameResult } from '../types/game.js';
 
 /**
  * 標本が少ないセルの縮約先。MLB の一般的な RE24（2010年代）を NPB の得点環境に合わせて 0.92 倍した値。
@@ -41,21 +31,6 @@ const PRIOR_RUN_EXPECTANCY: readonly number[] = [
 
 /** 事前表の重み（標本数換算）。標本10件で半々、100件で1割弱、1000件で1%程度になる */
 const PRIOR_WEIGHT = 10;
-
-/** 24状態（アウト数3 × 走者8）の得点期待値 */
-export interface RunExpectancyTable {
-  /** 添字は baseOutIndex(outs, bases)。その状態からイニング終了までに入る得点の平均（事前表に縮約済み） */
-  expected: number[];
-  /** 各状態の標本数（事前表の重みは含まない） */
-  samples: number[];
-  /**
-   * 「3アウト目のプレーで得点が入った」打席の件数。野球規則上ありえない遷移で、0 でなければ
-   * 試合シミュレーション側にバグがある（過去に併殺で3アウトになりながら三塁走者が生還する欠陥があった）
-   */
-  invariantViolations: number;
-  /** 3アウトで終わらなかった半イニング（サヨナラ）の件数。RE の標本からは除外する */
-  truncatedHalfInnings: number;
-}
 
 /** 1試合分のイベントを半イニングごとに分ける（記録順を保つ） */
 function splitHalfInnings(events: PlateAppearanceEvent[]): PlateAppearanceEvent[][] {

@@ -6,27 +6,8 @@
  * シーズン1の既定値は NPB 準拠（12球団 2リーグ 6球団、同一リーグ25試合×5、交流戦3試合×6 = 143試合）。
  */
 
-import type { Club } from '../data/clubs.js';
-
-export interface LeagueDefinition {
-  /** 球団が参照するリーグID */
-  id: string;
-  name: string;
-  /**
-   * 指名打者制。本拠地のリーグのルールを試合に適用する（交流戦の扱いは NPB と同じ）。
-   * 決定は両リーグ DH だが、リーグ再編オプションで DH なしのリーグも設定で作れるように残す
-   */
-  dh: boolean;
-}
-
-export interface LeagueConfig {
-  clubs: readonly Club[];
-  leagues: readonly LeagueDefinition[];
-  /** 同一リーグ内の1カードあたりの試合数（NPB: 25） */
-  gamesVsSameLeague: number;
-  /** 他リーグの1カードあたりの試合数（NPB: 3） */
-  gamesVsOtherLeague: number;
-}
+import type { Club } from '../types/club.js';
+import type { LeagueConfig, LeagueDefinition } from '../types/game.js';
 
 export function leagueOf(config: LeagueConfig, clubId: string): LeagueDefinition {
   const club = config.clubs.find((t) => t.id === clubId);

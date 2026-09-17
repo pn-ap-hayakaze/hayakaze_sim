@@ -13,19 +13,9 @@
  */
 
 import { Rng } from '../rng.js';
-import type { Club } from '../data/clubs.js';
-import { validateConfig, type LeagueConfig } from './config.js';
-
-export interface ScheduledGame {
-  /** 日程内の通し番号。試合用乱数の派生キーになる */
-  id: number;
-  /** 開幕を1日目とする通算日 */
-  day: number;
-  homeClubId: string;
-  awayClubId: string;
-  /** 交流戦か */
-  interleague: boolean;
-}
+import { validateConfig } from './config.js';
+import type { Club } from '../types/club.js';
+import type { LeagueConfig, ScheduledGame } from '../types/game.js';
 
 interface Matchup {
   homeClubId: string;

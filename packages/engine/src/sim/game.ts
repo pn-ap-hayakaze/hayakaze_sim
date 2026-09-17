@@ -8,39 +8,27 @@
  */
 
 import { Rng } from '../rng.js';
-import type { Roster } from '../player/generate.js';
-import type { Player, Position } from '../player/ratings.js';
-import { buildLineup, bullpen, pitcherValue, type Lineup } from '../league/lineup.js';
-import type { Club } from '../data/clubs.js';
+import { buildLineup, bullpen, pitcherValue } from '../league/lineup.js';
 import { applyFielding, applyParkFactor, batterProfile, pitcherProfile } from './profile.js';
-import { combine, sampleOutcome, type PaOutcome } from './oddsRatio.js';
-import { emptyBatting, emptyPitching, type BattingStats, type PitchingStats } from './stats.js';
-import { encodeBases, type PlateAppearanceEvent } from './events.js';
+import { combine, sampleOutcome } from './oddsRatio.js';
+import { emptyBatting, emptyPitching } from './stats.js';
+import { encodeBases } from './events.js';
+import type { Player, Position } from '../types/player.js';
+import type { Club } from '../types/club.js';
+import type {
+  BattingStats,
+  PaOutcome,
+  PitchingStats,
+  PlateAppearanceEvent,
+} from '../types/stats.js';
+import type { GameResult, GameRules, Lineup, PitcherCondition, Roster } from '../types/game.js';
 
 const MAX_INNINGS = 12;
-
-/**
- * 投手のコンディション。試合をまたぐ疲労はシーズン側が持ち、
- * 試合シミュレーションはこの問い合わせ口を通してのみ参照する。
- */
-export interface PitcherCondition {
-  /** 疲労度 0〜100。0 が完全回復。登板で増え、休養で回復する */
-  fatigue(p: Player): number;
-}
 
 /** 全員が完全回復している状態。単体テストや検証用 */
 export const ALL_FRESH: PitcherCondition = {
   fatigue: () => 0,
 };
-
-/**
- * この試合に適用するルール。リーグ設定から季節側が決めて渡す。
- * 試合シミュレーションはリーグの存在を知らない
- */
-export interface GameRules {
-  /** 指名打者制 */
-  dh: boolean;
-}
 
 /** この疲労度以上の投手は登板させない。体力の限界であり、連投日数のルールではない */
 const FATIGUE_UNAVAILABLE = 60;
@@ -48,20 +36,6 @@ const FATIGUE_UNAVAILABLE = 60;
 const FATIGUE_RATING_PENALTY = 0.15;
 /** 継投順の判断で疲労度1あたりに引く能力値相当。疲労20で能力値12点、階層1つ分に相当する */
 const FATIGUE_SELECTION_PENALTY = 0.6;
-
-export interface GameResult {
-  homeClubId: string;
-  awayClubId: string;
-  homeScore: number;
-  awayScore: number;
-  innings: number;
-  /** 引き分け */
-  tie: boolean;
-  batting: Map<string, BattingStats>;
-  pitching: Map<string, PitchingStats>;
-  /** 打席ごとの記録。RE24・線形ウェイト・WPA の元データ */
-  events: PlateAppearanceEvent[];
-}
 
 /** 攻撃中のチームの可変状態 */
 interface ClubState {

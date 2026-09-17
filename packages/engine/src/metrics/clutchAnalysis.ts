@@ -7,10 +7,11 @@
  */
 
 import { batterProfile, pitcherProfile } from '../sim/profile.js';
-import { combine, type OutcomeRates } from '../sim/oddsRatio.js';
-import type { Handedness, Player } from '../player/ratings.js';
-import type { Roster } from '../player/generate.js';
+import { combine } from '../sim/oddsRatio.js';
 import { buildLineup } from '../league/lineup.js';
+import type { Handedness, Player } from '../types/player.js';
+import type { ClutchAnalysis, OutcomeRates } from '../types/stats.js';
+import type { Roster } from '../types/game.js';
 
 /** wOBA の重み。シーズンから導出した値（seed 20260915）に近い固定値。解析の比較用なので固定でよい */
 const WOBA = { bb: 0.73, hbp: 0.75, single: 0.88, double: 1.35, triple: 1.74, hr: 2.3 };
@@ -96,32 +97,6 @@ export function correlation(a: number[], b: number[]): number {
     db += (b[i] - mb) ** 2;
   }
   return da === 0 || db === 0 ? 0 : num / Math.sqrt(da * db);
-}
-
-export interface ClutchAnalysis {
-  batters: number;
-  /**
-   * 真のクラッチ才能: （得点圏 wOBA − 通常 wOBA）の選手間 σ（wOBA ポイント）。
-   * スタメン（DH 込み 9 人 × 球団数）で測る。「50 = 出場している選手の平均」と同じ母集団で、
-   * The Book の推定（レギュラー対象、σ≈8）と比べられる値
-   */
-  talentSd: number;
-  /** 同じ σ を控えを含む全野手で測った値。乗算型なのでミートの低い控えは効きが小さく、スタメンより小さく出る */
-  talentSdAll: number;
-  /** スタメンの才能の平均。E[f]=1 なら 0 付近 */
-  talentMean: number;
-  /** 通常時のプラトーン差（対左 − 対右 wOBA）と得点圏でのプラトーン差の相関 */
-  platoonCorrelation: number;
-  /** 上位10%と下位10%（通常 wOBA 順）の wOBA 差。得点圏／通常 の比が 1 に近ければ階層が保たれている */
-  tierGapNormal: number;
-  tierGapRisp: number;
-  /** 投手側の真の才能 σ（被 wOBA ポイント） */
-  pitcherTalentSd: number;
-  /** クラッチ値そのものの分布 */
-  clutchMean: number;
-  clutchSd: number;
-  clutchMax: number;
-  clutchAbove65: number;
 }
 
 export function analyzeClutch(rosters: Roster[]): ClutchAnalysis {

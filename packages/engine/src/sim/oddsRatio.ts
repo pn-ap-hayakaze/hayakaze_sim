@@ -14,30 +14,7 @@
  */
 
 import type { Rng } from '../rng.js';
-
-/** 打席の結果カテゴリ */
-export type PaOutcome =
-  | 'K' // 三振
-  | 'BB' // 四球
-  | 'HBP' // 死球
-  | 'HR' // 本塁打
-  | 'TRIPLE' // 三塁打
-  | 'DOUBLE' // 二塁打
-  | 'SINGLE' // 単打
-  | 'OUT_IN_PLAY'; // インプレーのアウト（凡打）
-
-export const PA_OUTCOMES: readonly PaOutcome[] = [
-  'K',
-  'BB',
-  'HBP',
-  'HR',
-  'TRIPLE',
-  'DOUBLE',
-  'SINGLE',
-  'OUT_IN_PLAY',
-];
-
-export type OutcomeRates = Record<PaOutcome, number>;
+import { PA_OUTCOMES, type OutcomeRates, type PaOutcome } from '../types/stats.js';
 
 /**
  * リーグ平均の打席結果分布。「能力値50の打者 vs 能力値50の投手」で出る結果の率。

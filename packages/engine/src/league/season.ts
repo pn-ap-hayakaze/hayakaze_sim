@@ -6,41 +6,24 @@
  * advanceOneDay() の呼び出し回数が違うだけにする。挙動の乖離を防ぐため。
  */
 
-import { createRngStreams, deriveSeed, RNG_PURPOSE, type RngStreams } from '../rng.js';
-import { generateLeague, type Roster } from '../player/generate.js';
-import { generateSchedule, groupByDay, type ScheduledGame } from './schedule.js';
+import { createRngStreams, deriveSeed, RNG_PURPOSE } from '../rng.js';
+import { generateLeague } from '../player/generate.js';
+import { generateSchedule, groupByDay } from './schedule.js';
 import { rotationFor } from './lineup.js';
-import { simulateGame, type GameResult, type PitcherCondition } from '../sim/game.js';
-import type { Player } from '../player/ratings.js';
-import { NPB_DEFAULT_CONFIG, type Club } from '../data/clubs.js';
-import { leagueOf, validateConfig, type LeagueConfig } from './config.js';
-import {
-  addBatting,
-  addPitching,
-  emptyBatting,
-  emptyPitching,
-  type BattingStats,
-  type PitchingStats,
-} from '../sim/stats.js';
-
-export interface ClubRecord {
-  clubId: string;
-  wins: number;
-  losses: number;
-  ties: number;
-  runsScored: number;
-  runsAllowed: number;
-}
-
-/**
- * 投手の疲労。
- * 登板すると球数に応じて増え、毎日スタミナに応じて回復する。
- * 「3連投禁止」のような日数ルールは置かず、疲労が体力の限界を決める。
- */
-export interface PitcherFatigue {
-  /** 疲労度 0〜100 */
-  fatigue: number;
-}
+import { simulateGame } from '../sim/game.js';
+import { NPB_DEFAULT_CONFIG } from '../data/clubs.js';
+import { leagueOf, validateConfig } from './config.js';
+import { addBatting, addPitching, emptyBatting, emptyPitching } from '../sim/stats.js';
+import type { Player } from '../types/player.js';
+import type { Club } from '../types/club.js';
+import type {
+  ClubRecord,
+  GameResult,
+  PitcherCondition,
+  Roster,
+  SeasonOptions,
+  SeasonState,
+} from '../types/game.js';
 
 /**
  * 登板1回あたりの固定コスト（肩を作る負荷）。短い登板でも連投すれば積み上がる。
@@ -62,44 +45,6 @@ const FATIGUE_PER_PITCH = 0.7;
 export function dailyRecovery(p: Player): number {
   const recovery = p.ratings.pitching?.recovery ?? 50;
   return 10 + recovery * 0.2;
-}
-
-export interface SeasonState {
-  /** すべての乱数ストリームの根。セーブデータに保存する値 */
-  masterSeed: number;
-  /** シーズン年。試合用乱数の派生キーの一部 */
-  year: number;
-  /** 用途別・試合別の乱数。試合ごとに game(year, day, gameId) で払い出す */
-  streams: RngStreams;
-  /** リーグ構成。DH の有無・試合数・順位表はここから導出する */
-  config: LeagueConfig;
-  /** 球団ID → 球団 */
-  clubs: Map<string, Club>;
-  rosters: Map<string, Roster>;
-  schedule: ScheduledGame[];
-  scheduleByDay: Map<number, ScheduledGame[]>;
-  /** 次に進める日（1始まり） */
-  currentDay: number;
-  lastDay: number;
-  records: Map<string, ClubRecord>;
-  battingStats: Map<string, BattingStats>;
-  pitchingStats: Map<string, PitchingStats>;
-  /** 球団ごとの消化試合数。ローテーション決定に使う */
-  gamesPlayed: Map<string, number>;
-  /** 選手ID → 選手。疲労の回復計算などで使う索引 */
-  players: Map<string, Player>;
-  /** 投手ごとの疲労 */
-  pitcherFatigue: Map<string, PitcherFatigue>;
-  results: GameResult[];
-}
-
-export interface SeasonOptions {
-  /** シーズン年（既定 1） */
-  year?: number;
-  /** 乱数ストリームの差し替え口。テストで特定の試合の乱数消費を変えるために使う */
-  streams?: RngStreams;
-  /** リーグ構成（既定は NPB 準拠・両リーグ DH） */
-  config?: LeagueConfig;
 }
 
 export function createSeason(seed: number, options: SeasonOptions = {}): SeasonState {

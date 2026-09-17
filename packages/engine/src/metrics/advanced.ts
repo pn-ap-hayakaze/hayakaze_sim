@@ -16,58 +16,10 @@
  * 「fWAR 相当の簡易版」として読むこと。
  */
 
-import type { SeasonState } from '../league/season.js';
-import { LINEUP_SLOTS, type LineupSlot } from '../player/ratings.js';
-import type { BattingStats, PitchingStats } from '../sim/stats.js';
-import {
-  buildRunExpectancy,
-  deriveLinearWeights,
-  type LinearWeightOutcome,
-  type RunExpectancyTable,
-} from './runExpectancy.js';
-
-export interface WobaWeights {
-  bb: number;
-  hbp: number;
-  single: number;
-  double: number;
-  triple: number;
-  hr: number;
-}
-
-export interface LeagueContext {
-  runExpectancy: RunExpectancyTable;
-  /** 結果ごとの線形ウェイト（アウトを基準にしない生の値） */
-  linearWeights: Record<LinearWeightOutcome, number>;
-  /** アウト1つの線形ウェイト。三振とインプレーのアウトの加重平均 */
-  outWeight: number;
-  wobaWeights: WobaWeights;
-  /** wOBA を出塁率の尺度に合わせる倍率 */
-  wobaScale: number;
-  /** リーグ wOBA。構成上リーグ出塁率と一致する */
-  leagueWoba: number;
-  /** 1打席あたりのリーグ得点 */
-  runsPerPa: number;
-  leagueEra: number;
-  /** 失点ベースの 9回あたり得点 */
-  leagueRa9: number;
-  /** FIP をリーグ防御率の尺度に合わせる定数 */
-  cFip: number;
-  /** 1勝に相当する得点。得点環境で変わる */
-  runsPerWin: number;
-  /**
-   * 代替水準の野手が平均より低い得点（1打席あたり）。
-   * FanGraphs: 代替水準の総量は 570勝/2430試合 で固定し、RPW で得点に換算してリーグ全打席で割る。
-   * RPW を動的に導出しているので、代替水準もそれに追従させる（「20点/600PA」の旧近似は使わない）
-   */
-  replacementRunsPerPa: number;
-  /**
-   * リーグ補正（1打席あたり）。野手全体の 打撃 + 走塁 + 守備位置 の合計を 0 に戻す。
-   * wOBA の基準にはセ・リーグで打席に立つ投手も含まれるため、これがないと野手の合計が
-   * 平均より上に浮く（実測で +300 点 ≒ +35 WAR）
-   */
-  leagueAdjustmentPerPa: number;
-}
+import { buildRunExpectancy, deriveLinearWeights } from './runExpectancy.js';
+import { LINEUP_SLOTS, type LineupSlot } from '../types/player.js';
+import type { BattingStats, LeagueContext, PitchingStats, WobaWeights } from '../types/stats.js';
+import type { SeasonState } from '../types/game.js';
 
 /**
  * 打順枠ごとの補正（162試合あたりの得点）。FanGraphs の MLB 値をそのまま使う。

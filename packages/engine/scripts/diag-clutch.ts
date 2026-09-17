@@ -9,13 +9,14 @@
  *   階層差・プラトーン差が得点圏でも保たれる
  *   規定級投手の（防御率 − FIP）σ が現実の目安 0.45 から大きく外れない
  */
-import { advanceToEnd, createSeason, type SeasonState } from '../src/league/season.js';
+import { advanceToEnd, createSeason } from '../src/league/season.js';
 import { analyzeClutch, correlation, mean, stdev } from '../src/metrics/clutchAnalysis.js';
 import { leagueLevel } from '../src/metrics/leagueLevel.js';
 import { buildLeagueContext, fip, battingWar } from '../src/metrics/advanced.js';
-import { BASE_SECOND, BASE_THIRD } from '../src/sim/events.js';
 import { avg, era } from '../src/sim/stats.js';
 import { CLUTCH_GAIN_PER_10 } from '../src/sim/profile.js';
+import { BASE_SECOND, BASE_THIRD } from '../src/types/stats.js';
+import type { SeasonState } from '../src/types/game.js';
 
 const seed = Number(process.argv[2] ?? 20260915);
 const season = createSeason(seed);

@@ -5,24 +5,7 @@
  * 100 が最上位、1 が最下位。低いほど良い指標（三振率など）は反転して扱う。
  */
 
-export interface MetricSpec<T> {
-  /** 表示名 */
-  label: string;
-  /** 対象から数値を取り出す */
-  value: (item: T) => number;
-  /** false なら低いほど良い指標（FIP, 三振率など） */
-  higherIsBetter?: boolean;
-  /** 表示用の書式 */
-  format?: (v: number) => string;
-}
-
-export interface PercentileCell {
-  label: string;
-  value: number;
-  display: string;
-  /** 1〜100 */
-  percentile: number;
-}
+import type { MetricSpec, PercentileCell } from '../types/stats.js';
 
 /**
  * 母集団の中での value のパーセンタイル。

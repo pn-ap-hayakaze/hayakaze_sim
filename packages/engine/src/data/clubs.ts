@@ -6,25 +6,8 @@
  * 実名でプレイしたい場合は data/ 配下に外部データを差し込む想定。
  */
 
-import type { LeagueConfig } from '../league/config.js';
-
-/** リーグID。リーグ構成は設定で変えられるのでリテラル型にしない */
-export type LeagueId = string;
-
-export interface Club {
-  id: string;
-  /** 架空の球団名 */
-  name: string;
-  /** 2文字略称 */
-  shortName: string;
-  league: LeagueId;
-  /** 本拠地都市（実在） */
-  city: string;
-  /** 本拠地球場（実在） */
-  stadium: string;
-  /** パークファクター。1.0が中立。本塁打の出やすさ */
-  homeRunFactor: number;
-}
+import type { Club } from '../types/club.js';
+import type { LeagueConfig } from '../types/game.js';
 
 export const CLUBS: readonly Club[] = [
   // セントラル・リーグ

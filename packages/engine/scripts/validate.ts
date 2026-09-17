@@ -14,7 +14,6 @@ import {
   gamesBehind,
   standings,
   winPct,
-  type SeasonState,
 } from '../src/league/season.js';
 import {
   avg,
@@ -27,10 +26,7 @@ import {
   sumBatting,
   sumPitching,
   whip,
-  type BattingStats,
-  type PitchingStats,
 } from '../src/sim/stats.js';
-import type { Player } from '../src/player/ratings.js';
 import {
   battingWar,
   buildLeagueContext,
@@ -40,7 +36,10 @@ import {
   wrcPlus,
 } from '../src/metrics/advanced.js';
 import { baseOutIndex } from '../src/sim/events.js';
-import { percentileBar, percentileCard, type MetricSpec } from '../src/metrics/percentile.js';
+import { percentileBar, percentileCard } from '../src/metrics/percentile.js';
+import type { Player } from '../src/types/player.js';
+import type { BattingStats, MetricSpec, PitchingStats } from '../src/types/stats.js';
+import type { SeasonState } from '../src/types/game.js';
 
 const seed = Number(process.argv[2] ?? 20260915);
 

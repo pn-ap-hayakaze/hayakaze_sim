@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { createRngStreams, deriveSeed, Rng, RNG_PURPOSE, type RngStreams } from '../../src/rng.js';
 import { advanceToEnd, createSeason } from '../../src/league/season.js';
-import type { GameResult } from '../../src/sim/game.js';
+import type { GameResult } from '../../src/types/game.js';
 
 describe('Rng', () => {
   it('serialize/restore で以後の乱数列が完全に一致する', () => {

@@ -12,7 +12,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { advanceToEnd, createSeason } from '../../src/league/season.js';
-import { leagueLevel, type LeagueLevel } from '../../src/metrics/leagueLevel.js';
+import { leagueLevel } from '../../src/metrics/leagueLevel.js';
+import type { LeagueLevel } from '../../src/types/stats.js';
 
 const SEEDS = [20260915, 1, 2, 3, 4, 5];
 

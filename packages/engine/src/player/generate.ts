@@ -12,7 +12,6 @@ import { Rng } from '../rng.js';
 import { derivePitching, generateArsenal } from './arsenal.js';
 import { drawClutch } from './clutch.js';
 import { GIVEN_NAMES, SURNAMES } from '../data/names.js';
-import type { Club } from '../data/clubs.js';
 import {
   POSITIONS,
   type BatSide,
@@ -20,7 +19,9 @@ import {
   type Handedness,
   type Player,
   type Position,
-} from './ratings.js';
+} from '../types/player.js';
+import type { Club } from '../types/club.js';
+import type { Roster } from '../types/game.js';
 
 /** ロスター階層。mean は選手の総合的な力量の中心値 */
 interface Tier {
@@ -302,12 +303,6 @@ function generatePitcher(
 
 function clamp(v: number): number {
   return Math.round(Math.min(99, Math.max(1, v)));
-}
-
-export interface Roster {
-  club: Club;
-  batters: Player[];
-  pitchers: Player[];
 }
 
 /**

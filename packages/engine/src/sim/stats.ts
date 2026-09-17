@@ -1,53 +1,7 @@
 /** 成績の集計構造 */
 
-import { LINEUP_SLOTS, type LineupSlot } from '../player/ratings.js';
-
-export interface BattingStats {
-  g: number;
-  pa: number;
-  ab: number;
-  h: number;
-  double: number;
-  triple: number;
-  hr: number;
-  bb: number;
-  hbp: number;
-  so: number;
-  r: number;
-  rbi: number;
-  sb: number;
-  cs: number;
-  /** 失策出塁 */
-  roe: number;
-  /**
-   * 打順枠ごとの出場試合数。
-   * 守備位置補正は主ポジションではなくこの内訳で按分する。
-   * 遊撃手が DH で休んだ日は遊撃ではなく DH の補正がつく
-   */
-  appearances: Record<LineupSlot, number>;
-}
-
-export interface PitchingStats {
-  g: number;
-  gs: number;
-  outs: number;
-  bf: number;
-  h: number;
-  hr: number;
-  bb: number;
-  hbp: number;
-  so: number;
-  /** 推定投球数 */
-  pitches: number;
-  /** 失点 */
-  r: number;
-  /** 自責点 */
-  er: number;
-  w: number;
-  l: number;
-  sv: number;
-  hld: number;
-}
+import { LINEUP_SLOTS, type LineupSlot } from '../types/player.js';
+import type { BattingStats, PitchingStats } from '../types/stats.js';
 
 function emptyAppearances(): Record<LineupSlot, number> {
   const out = {} as Record<LineupSlot, number>;

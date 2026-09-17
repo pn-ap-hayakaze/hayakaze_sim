@@ -11,7 +11,13 @@
  */
 
 import type { Rng } from '../rng.js';
-import type { BreakDirection, Handedness, Pitch, PitchingRatings, PitchKind } from './ratings.js';
+import type {
+  BreakDirection,
+  Handedness,
+  Pitch,
+  PitchKind,
+  PitchingRatings,
+} from '../types/player.js';
 
 /** 球種テンプレート。方向は右投手・捕手視点。左投手は左右を鏡映する */
 interface PitchTemplate {

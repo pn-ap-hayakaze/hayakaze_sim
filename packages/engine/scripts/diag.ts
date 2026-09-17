@@ -8,7 +8,7 @@
  */
 import { advanceToEnd, createSeason } from '../src/league/season.js';
 import { era, ops, avg, whip } from '../src/sim/stats.js';
-import type { Player } from '../src/player/ratings.js';
+import type { Player } from '../src/types/player.js';
 
 const season = createSeason(Number(process.argv[2] ?? 20260915));
 advanceToEnd(season);

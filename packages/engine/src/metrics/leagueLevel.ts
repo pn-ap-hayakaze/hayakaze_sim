@@ -3,24 +3,9 @@
  * 「1チームあたり」の値は球団数から導出し、12 を埋め込まない。
  */
 
-import type { SeasonState } from '../league/season.js';
 import { avg, era, obp, ops, sumBatting, sumPitching, whip } from '../sim/stats.js';
-
-export interface LeagueLevel {
-  avg: number;
-  obp: number;
-  ops: number;
-  /** 1チーム1試合あたりの得点 */
-  runsPerGame: number;
-  era: number;
-  whip: number;
-  /** 1チーム1シーズンあたりの盗塁企図（成功 + 失敗） */
-  stealAttemptsPerClub: number;
-  stealSuccessRate: number;
-  kRate: number;
-  bbRate: number;
-  hrRate: number;
-}
+import type { LeagueLevel } from '../types/stats.js';
+import type { SeasonState } from '../types/game.js';
 
 export function leagueLevel(season: SeasonState): LeagueLevel {
   const b = sumBatting(season.battingStats.values());

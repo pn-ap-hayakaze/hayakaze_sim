@@ -9,15 +9,15 @@ import { describe, expect, it } from 'vitest';
 import { ALL_FRESH, simulateGame } from '../../src/sim/game.js';
 import { generateLeague } from '../../src/player/generate.js';
 import { rotationFor } from '../../src/league/lineup.js';
+import { Rng } from '../../src/rng.js';
+import { emptyBatting, addBatting } from '../../src/sim/stats.js';
+import { CLUBS } from '../../src/data/clubs.js';
 import {
   LINEUP_SLOTS,
   POSITIONS,
   type FieldingByPosition,
   type LineupSlot,
-} from '../../src/player/ratings.js';
-import { Rng } from '../../src/rng.js';
-import { emptyBatting, addBatting } from '../../src/sim/stats.js';
-import { CLUBS } from '../../src/data/clubs.js';
+} from '../../src/types/player.js';
 
 describe('守備位置と打順枠の型', () => {
   it('POSITIONS は守備位置 9 つで DH を含まない', () => {

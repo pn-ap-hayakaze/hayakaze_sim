@@ -6,8 +6,8 @@
  * 後で UI からの指示で差し替えられるよう純粋関数に保つ。
  */
 
-import type { Roster } from '../player/generate.js';
-import type { Player, Position } from '../player/ratings.js';
+import type { Player, Position } from '../types/player.js';
+import type { Bullpen, Lineup, Roster } from '../types/game.js';
 
 /** 打撃の総合的な良さ。打順決定にのみ使う簡易指標 */
 export function batterValue(p: Player): number {
@@ -27,16 +27,6 @@ function fieldingValue(p: Player, pos: Position): number {
 }
 
 const FIELD_POSITIONS: Position[] = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
-
-export interface Lineup {
-  /** 打順1〜9。DH制なしの場合9番は投手 */
-  order: Player[];
-  /** 守備位置 → 選手。投手は含まない */
-  defense: Map<Position, Player>;
-  /** 指名打者。DH制でない試合は null */
-  dh: Player | null;
-  startingPitcher: Player;
-}
 
 /**
  * スタメンを組む。
@@ -121,19 +111,6 @@ function arrangeBattingOrder(starters: Player[], pitcher: Player | null): Player
 export function rotationFor(roster: Roster, gameNumber: number): Player {
   const starters = roster.pitchers.filter((p) => p.pitcherRole === 'SP');
   return starters[gameNumber % starters.length];
-}
-
-/** ブルペンの役割分担 */
-export interface Bullpen {
-  /** 守護神。リードした9回に投げる */
-  closer: Player;
-  /**
-   * セットアッパー3人（勝ちパターンの7回・8回・9回要員）。接戦の終盤に投げ、それ以外では温存する。
-   * 2人では接戦終盤の需要（年間180登板前後）を賄えず、1人が95登板に達した
-   */
-  setup: Player[];
-  /** 中継ぎ。接戦以外の場面を担う */
-  middle: Player[];
 }
 
 /**
