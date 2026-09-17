@@ -106,7 +106,7 @@ Preseason (once a year, before day 1): aging and growth applied to every player,
 season's statistics, re-anchoring of the league-average outcome distribution to the playing population (F3), retirement
 decisions, schedule generation, roster reset to 65-man controlled lists for AI clubs.
 
-Offseason (after the postseason): draft (F9), retirements announced, contract expiry (a stub in Season 1: all players
+Offseason (after the postseason): draft (F9), retirements announced, contract expiry (a stub in v1: all players
 renew).
 
 ## 4. Data Model
@@ -177,7 +177,7 @@ extendedIfGamesBehind: 10, extendedIfOpponentWinPctBelow: 0.500 }`.
 | id, name, shortName, leagueId | Name = town + katakana nickname |
 | city, ballpark { name, homeRunFactor } | Real city, fictional ballpark |
 | strengthOffset | Generation-time team strength difference |
-| scoutIds | Season 1: a small fixed staff per club |
+| scoutIds | v1: a small fixed staff per club |
 | policy | `POLICY` |
 | estimates | `Map<playerId, ESTIMATE>` (private offsets are stored sparsely; see 4.7) |
 | isAi | All clubs except the GM's |
@@ -231,7 +231,7 @@ so that individual differences are not erased by growth toward a shared cap.
 | professionalism | `{ base, current }` — current drifts toward base |
 
 **HIDDEN_TRAITS** — `battedBall { meanLaunchAngle, pullTendency, groundFlyTendency }`, `contractPreferences`
-(weight vector, inert in Season 1), `retirementTiming` ("sense of timing").
+(weight vector, inert in v1), `retirementTiming` ("sense of timing").
 
 **HEALTH_STATE**
 
@@ -380,7 +380,7 @@ the GM's club use the GM club's view; AI clubs use their own.
 - **Deactivation**: any time; sets `deactivatedOnDay`; injured players are deactivated automatically.
 - **Pitch-and-deactivate**: after a start, if the starter's estimated stamina or durability is below a threshold, the AI
   deactivates them and re-registers on day +10, producing the 22–23% share of 10+-day start intervals.
-- **Release** (FR-3.4): controlled → free; the player joins a free pool (no signings in Season 1: released players retire
+- **Release** (FR-3.4): controlled → free; the player joins a free pool (no signings in v1: released players retire
   at season end unless an AI club with roster room claims them by estimated value).
 - **Retirement** (FR-3.5): evaluated each offseason and at mid-season checkpoints. Score = f(age, decline rate,
   playing-time drop, major injury this season, contract expiry stub) compared against the hidden `retirementTiming`; a
@@ -620,7 +620,7 @@ stateDiagram-v2
 │  コンタクト 57  選球眼 60      │  盗塁   █████████░ 93                 │
 │  走力 71  肩 55  遊撃守備 66   │  守備   ██████░░░░ 58                 │
 │  クラッチ 53  耐久 49          │                                       │
-│  上限 (推定): 55/65 形式は     │ 成長: コーチ所見なし (シーズン1)       │
+│  上限 (推定): 55/65 形式は     │ 成長: コーチ所見なし (v1)       │
 │  獲得前のみ表示                │ 故障歴: 今季 0日 / 昨季 21日 / 2季前 0 │
 ├───────────────────────────────┴──────────────────────────────────────┤
 │ 成績  年  球団  試 打席 打率 出塁 OPS  wOBA wRC+ WAR  | 二軍 ...      │

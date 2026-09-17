@@ -136,7 +136,7 @@ The prototype is the calibrated reference. It is ported, not rewritten.
 | 1 | Create the workspace root and `packages/engine` with the shared tsconfig, lint and vitest | `npm test` runs an empty suite in `engine` |
 | 2 | Move `prototype/src/engine/**` into `packages/engine/src/**` keeping module names; split types into `types/`; move `prototype/src/data` to `src/data` | `typecheck` passes |
 | 3 | Move `prototype/test/**` into `test/calibration` and `test/determinism`; move `prototype/scripts/**` into `scripts/` | `npm test` passes with the same 37 asserts + 1 known failure; `diag:levels` prints the same table for seed 20260915 |
-| 4 | Implement Season 1 features in `engine` per their steering work units | Each work unit's tasklist |
+| 4 | Implement v1 features in `engine` per their steering work units | Each work unit's tasklist |
 | 5 | Delete `prototype/` and its README; add a note in the root `README.md` pointing to the commit that removed it | No references to `prototype/` remain in `docs/` except this section's history |
 
 Until step 5, `prototype/` is frozen: no new mechanics are added there.
