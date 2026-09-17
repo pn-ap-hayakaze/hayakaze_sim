@@ -1,7 +1,7 @@
 # 要求内容: 初期実装（workspace 構築、エンジン移植、アプリ骨格）
 
 作成日: 2026-09-17 / 承認: 2026-09-17
-Issue: #2 / ブランチ: `feat/2-initial-implementation` / マイルストーン: Season 1
+Issue: #2 / ブランチ: `feat/2-initial-implementation` / マイルストーン: v1
 対象: リポジトリ全体（新規 `packages/engine`、`packages/app`、ルート設定）
 参照: `docs/repository-structure.md` 第4節（移行手順）、`docs/architecture.md`、`docs/development-guidelines.md`
 
@@ -10,7 +10,7 @@ Issue: #2 / ブランチ: `feat/2-initial-implementation` / マイルストー�
 永続文書6件が承認され、目標とするリポジトリ構成（npm workspaces、`packages/engine` と `packages/app`）が決まった。
 現状は `prototype/` に較正済みのエンジンとテストがあるだけで、目標構成のディレクトリは存在しない。
 
-本作業は、シーズン1の機能を実装する前の**土台作り**である。新しいゲームの仕組みは一切足さない。
+本作業は、v1の機能を実装する前の**土台作り**である。新しいゲームの仕組みは一切足さない。
 目的は次の3つ。
 
 1. プロトタイプのエンジンを**較正を崩さずに**目標構成へ移植する（移行手順1〜3）
@@ -59,7 +59,7 @@ Issue: #2 / ブランチ: `feat/2-initial-implementation` / マイルストー�
 ### 4. `prototype/` の扱い
 
 - 本作業では**削除しない**。移植の検証（同一シードで同一の表）に参照として使う
-- 削除は移行手順5（シーズン1機能の実装後）に別作業で行う。本作業では `prototype/README.md` の先頭に
+- 削除は移行手順5（v1機能の実装後）に別作業で行う。本作業では `prototype/README.md` の先頭に
   「凍結。実装は `packages/engine` へ移植済み」と注記する
 
 ## ユーザーストーリー
