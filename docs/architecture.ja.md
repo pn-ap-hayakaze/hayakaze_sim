@@ -31,7 +31,7 @@
 | 永続化 | `idb` ラッパー経由の IndexedDB | 数十 MB のセーブは `localStorage` を超える。`idb` は生の API に型付きの Promise を与える |
 | セーブの圧縮 | 書き出しファイルに `CompressionStream`（gzip） | ブラウザ組み込みで依存なし。ブラウザ内の保存は速度のため非圧縮のまま |
 | スキーマ検証 | Zod | 取り込み JSON とロードしたセーブを検証する。取り込み画面向けにパス付きのエラーメッセージを出せる |
-| Worker の橋渡し | 型付きメッセージ union による素の `postMessage` | 長いシミュレーション（`advanceTo`）は Web Worker で走らせる。メッセージ種類が少数なのでライブラリ（Comlink）は不要 |
+| Worker の橋渡し | 型付きメッセージ union による素の `postMessage` | 長いシミュレーション（`advanceTo`）は Web Worker で走らせる。メッセージ種類が少数なのでライブラリ（Comlink）は不要。初期実装では状態を直列化（セーブ形式）して Worker と往復させ、Worker はコマンド間で状態を持たない |
 | Lint / 整形 | ESLint（typescript-eslint）+ Prettier | 後述のエンジン制約（`Math.random` 禁止、DOM グローバル禁止）を lint 規則として強制する |
 | UI テスト | React Testing Library。後に Playwright のスモークテスト | コンポーネントの挙動。リリース前に「新規ゲーム → 1週間進める → 保存 → ロード」のエンドツーエンド確認を1本 |
 | CI | GitHub Actions | push ごとに typecheck、lint、test、build。`main` から Pages へデプロイ |
@@ -125,7 +125,7 @@ graph LR
   メッセージとともにファイル全体を拒否する。
 - ユーザーやファイル由来の文字列はすべてテキストとして描画する（React のエスケープ）。`dangerouslySetInnerHTML`、
   `eval`、動的 `Function` は使わない。
-- `index.html` の Content Security Policy: `default-src 'self'`。Worker は `'self'` から。
+- Content Security Policy `default-src 'self'; img-src 'self' data:` は Vite プラグインが**ビルド時にだけ** `index.html` に注入する。開発サーバーは React Fast Refresh がインラインスクリプトを要するため CSP を掛けない。本番ビルドにはインラインのスクリプトもスタイルもない（Tailwind v4 は CSS ファイルを出力する）ので `'unsafe-inline'` は不要。
 - どこにも何も送信しない。資格情報は存在しない。
 
 ### 4.5 セーブ形式

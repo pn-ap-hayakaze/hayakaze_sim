@@ -47,28 +47,35 @@ design.md の順序で進める。各タスクの完了条件を満たしたら 
 
 ## 3. `packages/app` の骨格
 
-- [ ] 3-1 Vite + React 19 + Tailwind v4（`@tailwindcss/vite`）+ React Router（HashRouter）+ Zustand + idb の初期化。
+- [x] 3-1 Vite + React 19 + Tailwind v4（`@tailwindcss/vite`）+ React Router（HashRouter）+ Zustand + idb の初期化。
   `vite.config.ts`（`base`、worker）、`index.html`（CSP メタ）、`styles/tailwind.css`
-- [ ] 3-2 `app/store.ts`、`app/session.ts`（`newGame`、`advanceDay`、`advanceToEnd`、`save`、`load`）
-- [ ] 3-3 `app/worker.ts`、`app/workerClient.ts`（直列化データの往復、progress）
-- [ ] 3-4 `app/persistence/indexedDb.ts`（`hayakaze` DB、`saves` ストア、スロット `default`）
-- [ ] 3-5 `ui/format/`（`fmtRate`、`fmtEra`、`fmtInnings`、`fmtRecord`、`fmtGamesBehind`、`fmtDay`）とテスト
-- [ ] 3-6 `ui/strings/`（title、dashboard、standings、shell）
-- [ ] 3-7 画面: `App.tsx`・`routes.tsx`・Shell、`screens/Title`、`screens/Dashboard`、`screens/Standings`、
+- [x] 3-2 `app/store.ts`、`app/session.ts`（`newGame`、`advanceDay`、`advanceToEnd`、`save`、`load`）
+- [x] 3-3 `app/worker.ts`、`app/workerClient.ts`（直列化データの往復、progress）
+- [x] 3-4 `app/persistence/indexedDb.ts`（`hayakaze` DB、`saves` ストア、スロット `default`）
+- [x] 3-5 `ui/format/`（`fmtRate`、`fmtEra`、`fmtInnings`、`fmtRecord`、`fmtGamesBehind`、`fmtDay`）とテスト
+- [x] 3-6 `ui/strings/`（title、dashboard、standings、shell）
+- [x] 3-7 画面: `App.tsx`・`routes.tsx`・Shell、`screens/Title`、`screens/Dashboard`、`screens/Standings`、
   `components/`（DataTable、Button、ProgressBar）
-- [ ] 3-8 `app/session.test.ts`（`fake-indexeddb`。`newGame`→`advanceDay` で 2 日目、`save`→`load` で順位表一致）
-- [ ] 3-9 ブラウザで手動確認: 新規開始 → 1日進める → 順位表 → 保存 → リロード → ロード → 順位表と現在日が一致。
+- [x] 3-8 `app/session.test.ts`（`fake-indexeddb`。`newGame`→`advanceDay` で 2 日目、`save`→`load` で順位表一致）
+- [x] 3-9 ブラウザで手動確認: 新規開始 → 1日進める → 順位表 → 保存 → リロード → ロード → 順位表と現在日が一致。
   「シーズン末まで進める」中に順位表・タイトルへ遷移できる
-  - 記録（1日の実行時間、Worker での1シーズンの実行時間、直列化データのサイズ、CSP の `style-src` の結果）:
+  - 記録: 手動確認の代わりに Playwright（scratchpad、リポジトリ外）で本番ビルド（`vite preview`）に対して自動確認。
+    新規開始 → 1日進める×2（Day 3、試合6件表示）→ 順位表 → 保存 → リロード → ロード → 順位表・Day が保存時と一致。
+    「シーズン末まで進める」で進捗バー表示中に順位表へ遷移でき、完走まで 312 ms（UI 込み）。コンソールのエラー・警告ゼロ。
+    node 計測: 1日 中央値 0.86 ms（p95 2.5 ms、最大 5.5 ms）、1シーズン 141 ms、セーブ JSON 17.1 MB（打席イベント込み。
+    直列化 88 ms、復元 55 ms）。CSP: 本番ビルドは `default-src 'self'; img-src 'self' data:` で `style-src` に `'unsafe-inline'` は不要だった
+    （Tailwind v4 の CSS は外部ファイル）。開発サーバーは Fast Refresh のインラインスクリプトのため CSP を掛けていない。
+    確認中に見つけた不具合1件を修正: `season` だけを購読するヘッダーが in-place 変更後に再描画されなかった（revision を購読）。
+    RTL・jsdom は本作業では未導入（UI テストは書式と session のみ）
   - 完了条件: `npm run build -w packages/app` が成功し、上記の手動確認が通る
 
 ## 4. `prototype/` の凍結と文書
 
-- [ ] 4-1 `prototype/README.md` と `README.ja.md` に凍結の注記を追加
-- [ ] 4-2 `docs/repository-structure.md` / `.ja.md` 1.2 の Tailwind 設定ファイルの行を v4 に合わせて修正
-- [ ] 4-3 `docs/architecture.md` / `.ja.md` 1.2 の Worker の行に「状態は直列化して往復（初期実装時点）」を追記
-- [ ] 4-4 `docs/glossary.md` / `.ja.md` に `ClubRecord`、`clubsInLeague`、`gamesPerClub` を反映
-- [ ] 4-5 実装中に見つかった文書と実装の食い違いを、この tasklist の「報告」節に列挙し、該当する `docs/` を英日で直す
+- [x] 4-1 `prototype/README.md` と `README.ja.md` に凍結の注記を追加
+- [x] 4-2 `docs/repository-structure.md` / `.ja.md` 1.2 の Tailwind 設定ファイルの行を v4 に合わせて修正
+- [x] 4-3 `docs/architecture.md` / `.ja.md` 1.2 の Worker の行に「状態は直列化して往復（初期実装時点）」を追記
+- [x] 4-4 `docs/glossary.md` / `.ja.md` に `ClubRecord`、`clubsInLeague`、`gamesPerClub` を反映
+- [x] 4-5 実装中に見つかった文書と実装の食い違いを、この tasklist の「報告」節に列挙し、該当する `docs/` を英日で直す
 
 ## 5. CI と最終確認
 
@@ -86,4 +93,13 @@ design.md の順序で進める。各タスクの完了条件を満たしたら 
 - `diag:levels` 前後対比:
 - テスト件数:
 - 実行時間:
-- 文書と実装の食い違い:
+- 文書と実装の食い違い（本作業で直したもの）:
+  1. Tailwind v4 は設定を CSS に持つ → repository-structure 1.2 の `tailwind.config.ts, postcss.config.js` を削除（英日）
+  2. CSP は `index.html` 固定ではなくビルド時注入。開発サーバーには掛けない → architecture 4.4 を実態に合わせた（英日）
+  3. Worker は状態を直列化して往復 → architecture 1.2 に追記（英日）
+  4. `gamesPerTeam` の例と用語集の league configuration 行を改名後の識別子に（英日）
+- 文書と実装の食い違い（後続作業に残すもの）:
+  1. `Club.stadium` は用語集では `ballpark`（球場は架空名にする作業で構造ごと変える）
+  2. セーブ JSON は 17.1 MB（設計の見込み 5 MB の3倍、上限 20 MB の設計内）。GM 球団以外の打席イベントを集計して破棄する作業で縮む
+  3. `data/clubs.ts` の球団名・球場名は実在ニックネーム流用のまま（決定どおり総入れ替えは別作業）
+  4. RTL・jsdom（architecture 1.2 の UI テスト）は未導入。画面のテストを書く作業で入れる

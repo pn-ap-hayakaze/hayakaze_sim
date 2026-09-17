@@ -66,7 +66,6 @@ packages/app/
 ├── package.json                     name: @hayakaze/app; scripts: dev, build, preview, test, typecheck, lint
 ├── index.html                       CSP meta, root element
 ├── vite.config.ts                   base path for GitHub Pages, worker config
-├── tailwind.config.ts, postcss.config.js
 ├── public/                          favicon, fonts (self-hosted)
 └── src/
     ├── main.tsx                     entry; mounts <App/>
@@ -84,7 +83,7 @@ packages/app/
     │   ├── components/              shared: DataTable, PercentileBar, RatingCell, GradeCell, Dialog, ...
     │   ├── format/                  number and date formatting (打率 .285, 防御率 2.85, 6月12日)
     │   └── strings/                 UI text (Japanese), one module per screen
-    └── styles/                      tailwind.css, design tokens
+    └── styles/                      tailwind.css (Tailwind v4: `@import` and `@theme` tokens; no tailwind.config / postcss.config)
 ```
 
 ## 2. Role of Each Directory

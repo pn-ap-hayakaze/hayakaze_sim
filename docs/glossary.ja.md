@@ -12,7 +12,7 @@
 
 | 日本語 | 英語 | コード | 定義 |
 |---|---|---|---|
-| リーグ構成 | league configuration | `LeagueConfig` | 球団、リーグ、リーグごとの DH、カードあたり試合数、登録枠、ポストシーズン形式。すべての数はここから導出する |
+| リーグ構成 | league configuration | `LeagueConfig`, `leagueOf`, `clubsInLeague`, `gamesPerClub` | 球団、リーグ、リーグごとの DH、カードあたり試合数、登録枠、ポストシーズン形式。すべての数はここから導出する |
 | リーグ | league | `LeagueDefinition`, `leagueId` | 主に互いと対戦する球団の集まり。既定はセントラルとパシフィック |
 | 球団 | club | `Club`, `clubId` | 組織としてのチーム。新しいコードでは「team」を避ける。プロトタイプの `Team` 型が残る箇所は例外 |
 | 本拠地 | home city | `city` | 実在の都市名 |
