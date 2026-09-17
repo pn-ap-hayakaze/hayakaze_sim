@@ -7,7 +7,8 @@ import { fmtDay } from './format/index.js';
 import { shell } from './strings/shell.js';
 
 function Shell({ children }: { children: React.ReactNode }) {
-  const season = useAppStore((s) => s.season);
+  // season は in-place で変わるので revision も購読して再描画させる
+  const { season } = useAppStore();
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `px-2 py-1 rounded ${isActive ? 'bg-neutral-200 font-semibold' : 'hover:bg-neutral-100'}`;
   return (

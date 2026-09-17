@@ -7,7 +7,7 @@ import { title } from '../../strings/title.js';
 
 export function Title() {
   const navigate = useNavigate();
-  const hasSave = useAppStore((s) => s.hasSave);
+  const { hasSave } = useAppStore();
   const [seed, setSeed] = useState('20260915');
 
   useEffect(() => {
