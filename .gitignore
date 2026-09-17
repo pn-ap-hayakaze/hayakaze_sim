@@ -20,3 +20,7 @@ Thumbs.db
 # ログ
 *.log
 npm-debug.log*
+
+# カバレッジ・パッケージのビルド成果物
+coverage/
+packages/*/dist/

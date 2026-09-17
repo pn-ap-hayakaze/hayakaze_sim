@@ -6,31 +6,31 @@ design.md の順序で進める。各タスクの完了条件を満たしたら 
 
 ## 0. 準備
 
-- [ ] 0-1 `main` の最新（PR #3、#5 のマージ後）を `feat/2-initial-implementation` に取り込んでいる
+- [x] 0-1 `main` の最新（PR #3、#5 のマージ後）を `feat/2-initial-implementation` に取り込んでいる
   - 完了条件: `git log` に `c964974`（#3）と `8e3abff`（#5）が含まれる
-- [ ] 0-2 移植前の基準を再取得して記録する: `prototype/` で `npm test`（37＋1）と `npm run diag:levels`（requirements の基準表と同一）
-  - 記録:
+- [x] 0-2 移植前の基準を再取得して記録する: `prototype/` で `npm test`（37＋1）と `npm run diag:levels`（requirements の基準表と同一）
+  - 記録: 37 passed / 1 expected fail。diag:levels は基準表と同一（2026-09-17 16:31）
 
 ## 1. workspace のルート
 
-- [ ] 1-1 ルート `package.json`（workspaces、展開スクリプト、`engines.node >= 24`）と `tsconfig.base.json`
-- [ ] 1-2 `eslint.config.js`（engine の `src/**` に `no-restricted-properties`・`no-restricted-globals` の上書き）と `.prettierrc`
-- [ ] 1-3 `.gitignore` に `coverage/`、`packages/*/dist/` を追加
-- [ ] 1-4 `.github/workflows/check.yml`
-- [ ] 1-5 ルートで `npm install` し `package-lock.json` を作る（`packages/*/package-lock.json` は作らない）
+- [x] 1-1 ルート `package.json`（workspaces、展開スクリプト、`engines.node >= 24`）と `tsconfig.base.json`
+- [x] 1-2 `eslint.config.js`（engine の `src/**` に `no-restricted-properties`・`no-restricted-globals` の上書き）と `.prettierrc`
+- [x] 1-3 `.gitignore` に `coverage/`、`packages/*/dist/` を追加
+- [x] 1-4 `.github/workflows/check.yml`
+- [x] 1-5 ルートで `npm install` し `package-lock.json` を作る（`packages/*/package-lock.json` は作らない）
   - 完了条件: 空の `packages/engine` と `packages/app` に対して `npm run typecheck`、`npm run lint`、`npm test` が
     エラーなく終わる（`--if-present` で何もしないことを含む）
 
 ## 2. `packages/engine` への移植
 
-- [ ] 2-1 `packages/engine/package.json`（`@hayakaze/engine`、`exports: ./src/index.ts`、scripts）、`tsconfig.json`
+- [x] 2-1 `packages/engine/package.json`（`@hayakaze/engine`、`exports: ./src/index.ts`、scripts）、`tsconfig.json`
   （`lib: ["ES2022"]`、`types: []`）、`tsconfig.scripts.json`、`vitest.config.ts`
-- [ ] 2-2 `prototype/src/engine/**` と `prototype/src/data/**` を `git mv` ではなくコピーで `packages/engine/src/` に置く
+- [x] 2-2 `prototype/src/engine/**` と `prototype/src/data/**` を `git mv` ではなくコピーで `packages/engine/src/` に置く
   （`prototype/` は凍結して残すため）。import パスを直し、**改名せず**に `typecheck` を通す
-- [ ] 2-3 `prototype/test/**` を `test/calibration/`・`test/determinism/` に、`prototype/scripts/**` を `scripts/` にコピーし、
+- [x] 2-3 `prototype/test/**` を `test/calibration/`・`test/determinism/` に、`prototype/scripts/**` を `scripts/` にコピーし、
   import パスを直す
   - 完了条件（改名前の中間確認）: `npm test -w packages/engine` が 37＋1、`diag:levels` が基準表と同一
-  - 記録:
+  - 記録: 37 passed / 1 expected fail。diag:levels は6シード全行が基準表と一致。typecheck・lint 緑。修正した import は teams.ts の config パス1件と、scripts/test のパス。prettier で37ファイルを整形（空白のみ）
 - [ ] 2-4 型を `src/types/` に分離する（`player.ts`、`club.ts`、`game.ts`、`stats.ts`）。design 2.1 の対応表どおり。
   実装モジュール間の型 import をなくす
 - [ ] 2-5 `Team` → `Club` 系の改名（design 2.2 の表）。`teams.ts` → `clubs.ts`
