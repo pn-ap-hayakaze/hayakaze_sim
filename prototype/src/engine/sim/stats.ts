@@ -1,5 +1,7 @@
 /** 成績の集計構造 */
 
+import { LINEUP_SLOTS, type LineupSlot } from '../player/ratings.js';
+
 export interface BattingStats {
   g: number;
   pa: number;
@@ -17,6 +19,12 @@ export interface BattingStats {
   cs: number;
   /** 失策出塁 */
   roe: number;
+  /**
+   * 打順枠ごとの出場試合数。
+   * 守備位置補正は主ポジションではなくこの内訳で按分する。
+   * 遊撃手が DH で休んだ日は遊撃ではなく DH の補正がつく
+   */
+  appearances: Record<LineupSlot, number>;
 }
 
 export interface PitchingStats {
@@ -41,10 +49,17 @@ export interface PitchingStats {
   hld: number;
 }
 
+function emptyAppearances(): Record<LineupSlot, number> {
+  const out = {} as Record<LineupSlot, number>;
+  for (const slot of LINEUP_SLOTS) out[slot] = 0;
+  return out;
+}
+
 export function emptyBatting(): BattingStats {
   return {
     g: 0, pa: 0, ab: 0, h: 0, double: 0, triple: 0, hr: 0,
     bb: 0, hbp: 0, so: 0, r: 0, rbi: 0, sb: 0, cs: 0, roe: 0,
+    appearances: emptyAppearances(),
   };
 }
 
@@ -57,14 +72,30 @@ export function emptyPitching(): PitchingStats {
 
 export function addBatting(target: BattingStats, source: BattingStats): void {
   for (const key of Object.keys(target) as (keyof BattingStats)[]) {
+    if (key === 'appearances') continue;
     target[key] += source[key];
   }
+  for (const slot of LINEUP_SLOTS) target.appearances[slot] += source.appearances[slot];
 }
 
 export function addPitching(target: PitchingStats, source: PitchingStats): void {
   for (const key of Object.keys(target) as (keyof PitchingStats)[]) {
     target[key] += source[key];
   }
+}
+
+/** 複数の打撃成績を合算する（リーグ全体・球団全体の水準を見るとき） */
+export function sumBatting(lines: Iterable<BattingStats>): BattingStats {
+  const total = emptyBatting();
+  for (const s of lines) addBatting(total, s);
+  return total;
+}
+
+/** 複数の投球成績を合算する */
+export function sumPitching(lines: Iterable<PitchingStats>): PitchingStats {
+  const total = emptyPitching();
+  for (const s of lines) addPitching(total, s);
+  return total;
 }
 
 export const avg = (s: BattingStats): number => (s.ab > 0 ? s.h / s.ab : 0);

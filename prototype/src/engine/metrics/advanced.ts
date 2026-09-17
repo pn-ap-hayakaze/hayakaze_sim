@@ -12,12 +12,12 @@
  *  - 守備の貢献は未算入（打球の層を入れて個人に守備機会を帰属できるまで保留）
  *  - 走塁は盗塁・盗塁死の定数評価のみ
  *  - パークファクター補正なし
- *  - DH は主ポジションの補正値で扱う
+ *  - 守備位置補正は FanGraphs の MLB 値（NPB の DELTA 値への差し替えは実装フェーズ）
  * 「fWAR 相当の簡易版」として読むこと。
  */
 
 import type { SeasonState } from '../league/season.js';
-import type { Position } from '../player/ratings.js';
+import { LINEUP_SLOTS, type LineupSlot } from '../player/ratings.js';
 import type { BattingStats, PitchingStats } from '../sim/stats.js';
 import {
   buildRunExpectancy,
@@ -70,10 +70,11 @@ export interface LeagueContext {
 }
 
 /**
- * 守備位置の補正（162試合あたりの得点）。FanGraphs の値をそのまま使う。
- * 難しい守備位置ほど、同じ打撃成績でも価値が高い。
+ * 打順枠ごとの補正（162試合あたりの得点）。FanGraphs の MLB 値をそのまま使う。
+ * 難しい守備位置ほど、同じ打撃成績でも価値が高い。DH は守らないので最も低い。
+ * 出場した枠ごとに按分するので、遊撃手が DH で出た日には遊撃の加点はつかない。
  */
-const POSITIONAL_ADJUSTMENT_PER_162: Record<Position, number> = {
+const POSITIONAL_ADJUSTMENT_PER_162: Record<LineupSlot, number> = {
   C: 12.5,
   SS: 7.5,
   '2B': 2.5,
@@ -82,6 +83,7 @@ const POSITIONAL_ADJUSTMENT_PER_162: Record<Position, number> = {
   LF: -7.5,
   RF: -7.5,
   '1B': -12.5,
+  DH: -17.5,
   P: 0,
 };
 
@@ -207,7 +209,7 @@ export function buildLeagueContext(season: SeasonState): LeagueContext {
   for (const [playerId, s] of season.battingStats) {
     const player = season.players.get(playerId);
     if (!player || player.primaryPosition === 'P') continue;
-    aboveAverageRuns += wraa(s, ctx) + baserunningRuns(s) + positionalRuns(s, player.primaryPosition);
+    aboveAverageRuns += wraa(s, ctx) + baserunningRuns(s) + positionalRuns(s);
     fielderPa += s.pa;
   }
   ctx.leagueAdjustmentPerPa = fielderPa > 0 ? -aboveAverageRuns / fielderPa : 0;
@@ -254,18 +256,22 @@ function baserunningRuns(s: BattingStats): number {
   return s.sb * STOLEN_BASE_RUNS + s.cs * CAUGHT_STEALING_RUNS;
 }
 
-/** 守備位置補正の得点。162試合あたりの値を出場試合数で按分する */
-function positionalRuns(s: BattingStats, position: Position): number {
-  return POSITIONAL_ADJUSTMENT_PER_162[position] * (s.g / 162);
+/** 守備位置補正の得点。出場した枠ごとに、162試合あたりの値を出場試合数で按分する */
+export function positionalRuns(s: BattingStats): number {
+  let runs = 0;
+  for (const slot of LINEUP_SLOTS) {
+    runs += POSITIONAL_ADJUSTMENT_PER_162[slot] * (s.appearances[slot] / 162);
+  }
+  return runs;
 }
 
 /** 野手の WAR。守備は未算入 */
-export function battingWar(s: BattingStats, position: Position, ctx: LeagueContext): number {
+export function battingWar(s: BattingStats, ctx: LeagueContext): number {
   if (s.pa === 0) return 0;
   const runs =
     wraa(s, ctx) +
     baserunningRuns(s) +
-    positionalRuns(s, position) +
+    positionalRuns(s) +
     ctx.leagueAdjustmentPerPa * s.pa +
     ctx.replacementRunsPerPa * s.pa;
   return runs / ctx.runsPerWin;

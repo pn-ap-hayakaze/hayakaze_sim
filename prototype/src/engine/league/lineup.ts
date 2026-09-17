@@ -31,8 +31,10 @@ const FIELD_POSITIONS: Position[] = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'R
 export interface Lineup {
   /** 打順1〜9。DH制なしの場合9番は投手 */
   order: Player[];
-  /** 守備位置 → 選手 */
+  /** 守備位置 → 選手。投手は含まない */
   defense: Map<Position, Player>;
+  /** 指名打者。DH制でない試合は null */
+  dh: Player | null;
   startingPitcher: Player;
 }
 
@@ -68,9 +70,10 @@ export function buildLineup(
 
   const starters = FIELD_POSITIONS.map((pos) => defense.get(pos)!);
 
+  let dh: Player | null = null;
   if (useDh) {
     // 残りの中で最も打てる選手をDHに
-    const dh = available.reduce((a, b) => (batterValue(a) >= batterValue(b) ? a : b));
+    dh = available.reduce((a, b) => (batterValue(a) >= batterValue(b) ? a : b));
     starters.push(dh);
   } else {
     starters.push(startingPitcher);
@@ -79,6 +82,7 @@ export function buildLineup(
   return {
     order: arrangeBattingOrder(starters, useDh ? null : startingPitcher),
     defense,
+    dh,
     startingPitcher,
   };
 }

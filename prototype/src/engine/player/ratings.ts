@@ -4,9 +4,17 @@
  * 「平均が 50」という基準を崩すと Odds Ratio の合成式が壊れるので注意。
  */
 
-/** 守備位置。投手を含む 9 ポジション + 指名打者 */
+/** 守備位置。投手を含む 9 ポジション。指名打者は守備位置ではないのでここには含めない */
 export const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'] as const;
 export type Position = (typeof POSITIONS)[number];
+
+/**
+ * 打順の枠。守備位置 9 つ + 指名打者。
+ * DH は「打つが守らない」枠であり、守備力（FieldingByPosition）は持たない。
+ * POSITIONS に DH を足すと全選手に無意味な「DHの守備力」が生まれるので、型を分ける。
+ */
+export const LINEUP_SLOTS = [...POSITIONS, 'DH'] as const;
+export type LineupSlot = (typeof LINEUP_SLOTS)[number];
 
 /** 利き（投／打） */
 export type Handedness = 'R' | 'L';
@@ -31,7 +39,12 @@ export interface BattingRatings {
   contact: number;
   /** 選球眼 — 四球率を上げ、三振率をわずかに下げる */
   eye: number;
-  /** クラッチ — 得点圏でのコンタクト力。走者が二塁・三塁にいる打席では contact の代わりに使う */
+  /**
+   * クラッチ（勝負強さ）— 得点圏（走者二塁または三塁）でミートに掛かる係数の元。
+   * 実効ミート = meetAgainst × f(clutch)、f(50) = 1.0。置換ではなく乗算なので、
+   * ミートが高い選手ほど得点圏での上振れの絶対値が大きい（勝負強さは実力の増幅）。
+   * 左右別にはしない。ミート・階層と独立に生成し、上側の裾が薄い（70 を超えない）
+   */
   clutch: number;
 }
 
@@ -140,7 +153,10 @@ export interface PitchingRatings {
    * スタミナとは独立した特性。スタミナが高くても回復が遅い投手は連投に向かない
    */
   recovery: number;
-  /** クラッチ — 得点圏での被安打抑止力。走者が二塁・三塁にいる打席では hits の代わりに使う */
+  /**
+   * クラッチ — 得点圏で hits に掛かる係数の元。打者側と同型で、実効 hits = hits × f(clutch)。
+   * hits とは独立に生成する
+   */
   clutch: number;
 
   /** 所持球種。最低1つはストレート系を含む */
