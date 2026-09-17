@@ -39,7 +39,7 @@ const TARGETS: Target[] = [
 /** 修正がスコープ外で、現状では目標に届かないことが分かっている項目。届いたら it.fails が落ちて気づける */
 const KNOWN_FAILING: Target[] = [
   // attemptSteal が2アウトと三盗を許しておらず、チーム走塁方針のレバーもない。実測 66〜76/チーム
-  { key: 'stealAttemptsPerTeam', label: '盗塁企図 1チーム', lo: 105, hi: 110, tolerance: 15 },
+  { key: 'stealAttemptsPerClub', label: '盗塁企図 1チーム', lo: 105, hi: 110, tolerance: 15 },
 ];
 
 const levels: LeagueLevel[] = SEEDS.map((seed) => {

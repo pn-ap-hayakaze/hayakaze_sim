@@ -186,7 +186,7 @@ export interface Ratings {
 export interface Player {
   id: string;
   name: string;
-  teamId: string;
+  clubId: string;
   age: number;
   /** 投げる手 */
   throws: Handedness;

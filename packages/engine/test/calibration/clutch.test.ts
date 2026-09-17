@@ -14,7 +14,7 @@ import { leagueLevel } from '../../src/metrics/leagueLevel.js';
 import { clutchFactor } from '../../src/sim/profile.js';
 import { CLUTCH_CEILING, drawClutch } from '../../src/player/clutch.js';
 import { Rng } from '../../src/rng.js';
-import { TEAMS } from '../../src/data/teams.js';
+import { CLUBS } from '../../src/data/clubs.js';
 
 const SEEDS = [20260915, 1, 2, 3, 4, 5];
 
@@ -52,7 +52,7 @@ describe('クラッチの生成分布', () => {
 });
 
 describe('真のクラッチ才能（解析値）', () => {
-  const results = SEEDS.map((seed) => analyzeClutch(generateLeague(seed, TEAMS)));
+  const results = SEEDS.map((seed) => analyzeClutch(generateLeague(seed, CLUBS)));
   const mean = (f: (r: (typeof results)[number]) => number) =>
     results.reduce((a, r) => a + f(r), 0) / results.length;
 

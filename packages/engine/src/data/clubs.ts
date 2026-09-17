@@ -11,7 +11,7 @@ import type { LeagueConfig } from '../league/config.js';
 /** リーグID。リーグ構成は設定で変えられるのでリテラル型にしない */
 export type LeagueId = string;
 
-export interface Team {
+export interface Club {
   id: string;
   /** 架空の球団名 */
   name: string;
@@ -26,7 +26,7 @@ export interface Team {
   homeRunFactor: number;
 }
 
-export const TEAMS: readonly Team[] = [
+export const CLUBS: readonly Club[] = [
   // セントラル・リーグ
   {
     id: 'C01',
@@ -140,10 +140,10 @@ export const TEAMS: readonly Team[] = [
   },
 ];
 
-export function teamById(id: string): Team {
-  const team = TEAMS.find((t) => t.id === id);
-  if (!team) throw new Error(`不明な球団ID: ${id}`);
-  return team;
+export function clubById(id: string): Club {
+  const club = CLUBS.find((t) => t.id === id);
+  if (!club) throw new Error(`不明な球団ID: ${id}`);
+  return club;
 }
 
 /**
@@ -151,7 +151,7 @@ export function teamById(id: string): Team {
  * 同一リーグ 25試合 × 5球団 + 交流戦 3試合 × 6球団 = 143試合。
  */
 export const NPB_DEFAULT_CONFIG: LeagueConfig = {
-  teams: TEAMS,
+  clubs: CLUBS,
   leagues: [
     { id: 'CENTRAL', name: 'セントラル・リーグ', dh: true },
     { id: 'PACIFIC', name: 'パシフィック・リーグ', dh: true },

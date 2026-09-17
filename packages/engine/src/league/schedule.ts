@@ -13,7 +13,7 @@
  */
 
 import { Rng } from '../rng.js';
-import type { Team } from '../data/teams.js';
+import type { Club } from '../data/clubs.js';
 import { validateConfig, type LeagueConfig } from './config.js';
 
 export interface ScheduledGame {
@@ -21,40 +21,40 @@ export interface ScheduledGame {
   id: number;
   /** 開幕を1日目とする通算日 */
   day: number;
-  homeTeamId: string;
-  awayTeamId: string;
+  homeClubId: string;
+  awayClubId: string;
   /** 交流戦か */
   interleague: boolean;
 }
 
 interface Matchup {
-  homeTeamId: string;
-  awayTeamId: string;
+  homeClubId: string;
+  awayClubId: string;
   interleague: boolean;
 }
 
 /** 総当たりの対戦カードを作る（ホーム／ビジターの振り分けを含む） */
 function buildMatchups(rng: Rng, config: LeagueConfig): Matchup[] {
   const matchups: Matchup[] = [];
-  const teams = config.teams;
+  const clubs = config.clubs;
 
-  const addPair = (a: Team, b: Team, games: number, interleague: boolean) => {
+  const addPair = (a: Club, b: Club, games: number, interleague: boolean) => {
     // ホームゲームを半分ずつに割り振る。奇数分は乱数で決める
     const aHome = Math.floor(games / 2) + (games % 2 === 1 && rng.chance(0.5) ? 1 : 0);
     for (let i = 0; i < games; i++) {
       const isAHome = i < aHome;
       matchups.push({
-        homeTeamId: isAHome ? a.id : b.id,
-        awayTeamId: isAHome ? b.id : a.id,
+        homeClubId: isAHome ? a.id : b.id,
+        awayClubId: isAHome ? b.id : a.id,
         interleague,
       });
     }
   };
 
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      const a = teams[i];
-      const b = teams[j];
+  for (let i = 0; i < clubs.length; i++) {
+    for (let j = i + 1; j < clubs.length; j++) {
+      const a = clubs[i];
+      const b = clubs[j];
       if (a.league === b.league) {
         addPair(a, b, config.gamesVsSameLeague, false);
       } else {
@@ -77,12 +77,12 @@ export function generateSchedule(seed: number, config: LeagueConfig): ScheduledG
   const rng = new Rng(seed);
   const remaining = rng.shuffle(buildMatchups(rng, config));
   const games: ScheduledGame[] = [];
-  const teamCount = config.teams.length;
+  const clubCount = config.clubs.length;
 
   let day = 0;
-  const gamesPlayed = new Map<string, number>(config.teams.map((t) => [t.id, 0]));
+  const gamesPlayed = new Map<string, number>(config.clubs.map((t) => [t.id, 0]));
   // 上限日数は総試合数に比例させる。1日に最大 floor(球団数/2) 試合なので、その3倍あれば十分
-  const maxDays = Math.max(400, Math.ceil((remaining.length / Math.floor(teamCount / 2)) * 3));
+  const maxDays = Math.max(400, Math.ceil((remaining.length / Math.floor(clubCount / 2)) * 3));
 
   while (remaining.length > 0) {
     day++;
@@ -93,18 +93,18 @@ export function generateSchedule(seed: number, config: LeagueConfig): ScheduledG
     // 消化試合数が少ない球団を優先し、偏りを抑える
     remaining.sort(
       (a, b) =>
-        Math.min(gamesPlayed.get(a.homeTeamId)!, gamesPlayed.get(a.awayTeamId)!) -
-        Math.min(gamesPlayed.get(b.homeTeamId)!, gamesPlayed.get(b.awayTeamId)!),
+        Math.min(gamesPlayed.get(a.homeClubId)!, gamesPlayed.get(a.awayClubId)!) -
+        Math.min(gamesPlayed.get(b.homeClubId)!, gamesPlayed.get(b.awayClubId)!),
     );
 
-    for (let i = 0; i < remaining.length && busy.size < teamCount - 1; i++) {
+    for (let i = 0; i < remaining.length && busy.size < clubCount - 1; i++) {
       const m = remaining[i];
-      if (busy.has(m.homeTeamId) || busy.has(m.awayTeamId)) continue;
-      busy.add(m.homeTeamId);
-      busy.add(m.awayTeamId);
+      if (busy.has(m.homeClubId) || busy.has(m.awayClubId)) continue;
+      busy.add(m.homeClubId);
+      busy.add(m.awayClubId);
       games.push({ id: -1, day, ...m });
-      gamesPlayed.set(m.homeTeamId, gamesPlayed.get(m.homeTeamId)! + 1);
-      gamesPlayed.set(m.awayTeamId, gamesPlayed.get(m.awayTeamId)! + 1);
+      gamesPlayed.set(m.homeClubId, gamesPlayed.get(m.homeClubId)! + 1);
+      gamesPlayed.set(m.awayClubId, gamesPlayed.get(m.awayClubId)! + 1);
       remaining.splice(i, 1);
       i--;
     }

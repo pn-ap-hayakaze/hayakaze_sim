@@ -12,7 +12,7 @@ import { Rng } from '../rng.js';
 import { derivePitching, generateArsenal } from './arsenal.js';
 import { drawClutch } from './clutch.js';
 import { GIVEN_NAMES, SURNAMES } from '../data/names.js';
-import type { Team } from '../data/teams.js';
+import type { Club } from '../data/clubs.js';
 import {
   POSITIONS,
   type BatSide,
@@ -180,7 +180,7 @@ function rollHandedness(rng: Rng): { throws: Handedness; bats: BatSide } {
 function generateBatter(
   rng: Rng,
   names: NamePool,
-  team: Team,
+  club: Club,
   id: string,
   position: Exclude<Position, 'P'>,
   talent: number,
@@ -199,7 +199,7 @@ function generateBatter(
   return {
     id,
     name: names.take(),
-    teamId: team.id,
+    clubId: club.id,
     age: rng.rating(27, 4, 19, 41),
     throws,
     bats,
@@ -239,7 +239,7 @@ function generateBatter(
 function generatePitcher(
   rng: Rng,
   names: NamePool,
-  team: Team,
+  club: Club,
   id: string,
   role: 'SP' | 'RP' | 'CL',
   talent: number,
@@ -260,7 +260,7 @@ function generatePitcher(
   return {
     id,
     name: names.take(),
-    teamId: team.id,
+    clubId: club.id,
     age: rng.rating(27, 4, 19, 42),
     throws,
     bats: throws === 'L' ? 'L' : 'R',
@@ -305,7 +305,7 @@ function clamp(v: number): number {
 }
 
 export interface Roster {
-  team: Team;
+  club: Club;
   batters: Player[];
   pitchers: Player[];
 }
@@ -314,16 +314,16 @@ export interface Roster {
  * 全球団のロスターを生成する。球団リストはリーグ設定から受け取る。
  * 球団ごとに戦力補正をかけ、順位争いが生まれるようにする。
  */
-export function generateLeague(seed: number, teams: readonly Team[]): Roster[] {
+export function generateLeague(seed: number, clubs: readonly Club[]): Roster[] {
   const rng = new Rng(seed);
   const names = new NamePool(rng);
 
   // 球団間の戦力差。全選手に一律で乗るため、値が大きいと順位が固定化する。
   // 標準偏差3.5で試したところ勝率.874と.105の球団が生まれた。
-  const teamStrengths = teams.map(() => rng.normal(0, 1.0));
+  const clubStrengths = clubs.map(() => rng.normal(0, 1.0));
 
-  return teams.map((team, teamIndex) => {
-    const strength = teamStrengths[teamIndex];
+  return clubs.map((club, clubIndex) => {
+    const strength = clubStrengths[clubIndex];
     const batters: Player[] = [];
     const pitchers: Player[] = [];
 
@@ -338,8 +338,8 @@ export function generateLeague(seed: number, teams: readonly Team[]): Roster[] {
           generateBatter(
             rng,
             names,
-            team,
-            `${team.id}-B${String(++seq).padStart(2, '0')}`,
+            club,
+            `${club.id}-B${String(++seq).padStart(2, '0')}`,
             position,
             tier.mean + strength,
           ),
@@ -354,8 +354,8 @@ export function generateLeague(seed: number, teams: readonly Team[]): Roster[] {
           generatePitcher(
             rng,
             names,
-            team,
-            `${team.id}-P${String(++seq).padStart(2, '0')}`,
+            club,
+            `${club.id}-P${String(++seq).padStart(2, '0')}`,
             tier.role,
             tier.mean + strength,
           ),
@@ -363,6 +363,6 @@ export function generateLeague(seed: number, teams: readonly Team[]): Roster[] {
       }
     }
 
-    return { team, batters, pitchers };
+    return { club, batters, pitchers };
   });
 }

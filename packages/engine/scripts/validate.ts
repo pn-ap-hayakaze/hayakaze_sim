@@ -7,7 +7,7 @@
  * engine/sim/oddsRatio.ts の LEAGUE_AVERAGE を調整する。
  */
 
-import { gamesPerTeam } from '../src/league/config.js';
+import { gamesPerClub } from '../src/league/config.js';
 import {
   advanceToEnd,
   createSeason,
@@ -57,9 +57,9 @@ console.log(
     `(1試合あたり ${((finished - generated) / totalGames).toFixed(2)}ms)`,
 );
 
-const teamById = (id: string) => season.teams.get(id)!;
+const clubById = (id: string) => season.clubs.get(id)!;
 /** 1球団の年間試合数。全球団が同数の前提で先頭球団から導出する */
-const gamesPerSeason = gamesPerTeam(season.config, season.config.teams[0].id);
+const gamesPerSeason = gamesPerClub(season.config, season.config.clubs[0].id);
 
 // --- 順位表 ---
 for (const league of season.config.leagues) {
@@ -67,11 +67,11 @@ for (const league of season.config.leagues) {
   console.log('順位 球団           試合  勝  敗 分   勝率   差   得点  失点');
   const table = standings(season, league.id);
   table.forEach((r, i) => {
-    const team = teamById(r.teamId);
+    const club = clubById(r.clubId);
     const g = r.wins + r.losses + r.ties;
     const gb = i === 0 ? '  -' : gamesBehind(table[0], r).toFixed(1).padStart(4);
     console.log(
-      `${String(i + 1).padStart(2)}  ${team.name.padEnd(12, '　')} ${String(g).padStart(4)} ` +
+      `${String(i + 1).padStart(2)}  ${club.name.padEnd(12, '　')} ${String(g).padStart(4)} ` +
         `${String(r.wins).padStart(3)} ${String(r.losses).padStart(3)} ${String(r.ties).padStart(2)} ` +
         ` ${fmtRate(winPct(r))} ${gb}  ${String(r.runsScored).padStart(4)} ${String(r.runsAllowed).padStart(5)}`,
     );
@@ -124,7 +124,7 @@ for (const { player, stats } of qualifiedPitchers
   .sort((a, b) => era(a.stats) - era(b.stats))
   .slice(0, 10)) {
   console.log(
-    `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+    `${player.name.padEnd(10, '　')} ${clubById(player.clubId).name.padEnd(10, '　')} ` +
       `${String(stats.g).padStart(4)} ${String(stats.w).padStart(3)} ${String(stats.l).padStart(3)} ` +
       `${inningsPitched(stats).padStart(7)} ${era(stats).toFixed(2).padStart(7)} ` +
       `${String(stats.so).padStart(6)} ${whip(stats).toFixed(2).padStart(6)}`,
@@ -168,7 +168,7 @@ for (const { player, stats } of [...qualified]
   .sort((a, b) => wrcPlus(b.stats, ctx) - wrcPlus(a.stats, ctx))
   .slice(0, 10)) {
   console.log(
-    `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+    `${player.name.padEnd(10, '　')} ${clubById(player.clubId).name.padEnd(10, '　')} ` +
       `${fmtRate(woba(stats, ctx))} ${wrcPlus(stats, ctx).toFixed(0).padStart(5)} ` +
       `${battingWar(stats, ctx).toFixed(1).padStart(5)}  ${player.primaryPosition}`,
   );
@@ -180,7 +180,7 @@ for (const { player, stats } of qualifiedPitchers
   .sort((a, b) => fip(a.stats, ctx) - fip(b.stats, ctx))
   .slice(0, 10)) {
   console.log(
-    `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+    `${player.name.padEnd(10, '　')} ${clubById(player.clubId).name.padEnd(10, '　')} ` +
       `${fip(stats, ctx).toFixed(2).padStart(5)} ${era(stats).toFixed(2).padStart(7)} ${pitchingWar(stats, ctx).toFixed(1).padStart(6)}`,
   );
 }
@@ -190,7 +190,7 @@ const regulars = allBatters(season).filter((e) => e.stats.pa >= 300);
 const leader = [...qualified].sort((a, b) => wrcPlus(b.stats, ctx) - wrcPlus(a.stats, ctx))[0];
 if (leader) {
   console.log(
-    `\n=== パーセンタイル: ${leader.player.name}（${teamById(leader.player.teamId).name} / ${leader.player.primaryPosition}）===`,
+    `\n=== パーセンタイル: ${leader.player.name}（${clubById(leader.player.clubId).name} / ${leader.player.primaryPosition}）===`,
   );
   type Entry = { player: Player; stats: BattingStats };
   const ratingMetrics: MetricSpec<Entry>[] = [
@@ -248,7 +248,7 @@ console.log('\n=== 健全性チェック ===');
 check(
   `全球団が${gamesPerSeason}試合を消化`,
   [...season.records.values()].every(
-    (r) => r.wins + r.losses + r.ties === gamesPerTeam(season.config, r.teamId),
+    (r) => r.wins + r.losses + r.ties === gamesPerClub(season.config, r.clubId),
   ),
 );
 check('リーグ全体の得失点が一致', leagueTotalsBalance(season));
@@ -381,7 +381,7 @@ function printBatters(entries: { player: Player; stats: BattingStats }[]): void 
   );
   for (const { player, stats } of entries) {
     console.log(
-      `${player.name.padEnd(10, '　')} ${teamById(player.teamId).name.padEnd(10, '　')} ` +
+      `${player.name.padEnd(10, '　')} ${clubById(player.clubId).name.padEnd(10, '　')} ` +
         `${fmtRate(avg(stats))} ${String(stats.g).padStart(5)} ${String(stats.ab).padStart(5)} ` +
         `${String(stats.h).padStart(5)} ${String(stats.hr).padStart(3)} ${String(stats.rbi).padStart(4)} ` +
         `${String(stats.sb).padStart(3)} ${String(stats.bb).padStart(5)} ${String(stats.so).padStart(5)} ` +

@@ -6,7 +6,7 @@
  * LEAGUE_AVERAGE / SLOPE を触る前後でこの表を取り、README の較正表に転記する。
  */
 import { advanceToEnd, createSeason } from '../src/league/season.js';
-import { gamesPerTeam } from '../src/league/config.js';
+import { gamesPerClub } from '../src/league/config.js';
 import { leagueLevel } from '../src/metrics/leagueLevel.js';
 import { avg, era, ops } from '../src/sim/stats.js';
 
@@ -43,7 +43,7 @@ for (const seed of seeds) {
   const s = createSeason(seed);
   advanceToEnd(s);
   const l = leagueLevel(s);
-  const games = gamesPerTeam(s.config, s.config.teams[0].id);
+  const games = gamesPerClub(s.config, s.config.clubs[0].id);
   const batters = [...s.battingStats.entries()].filter(
     ([id]) => s.players.get(id)!.primaryPosition !== 'P',
   );
@@ -60,7 +60,7 @@ for (const seed of seeds) {
     k: l.kRate,
     bb: l.bbRate,
     hr: l.hrRate,
-    sba: l.stealAttemptsPerTeam,
+    sba: l.stealAttemptsPerClub,
     sbPct: l.stealSuccessRate,
     topAvg: Math.max(...qualified.map(avg)),
     topHr: Math.max(...batters.map(([, st]) => st.hr)),

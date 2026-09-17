@@ -11,7 +11,7 @@ import { Rng } from '../rng.js';
 import type { Roster } from '../player/generate.js';
 import type { Player, Position } from '../player/ratings.js';
 import { buildLineup, bullpen, pitcherValue, type Lineup } from '../league/lineup.js';
-import type { Team } from '../data/teams.js';
+import type { Club } from '../data/clubs.js';
 import { applyFielding, applyParkFactor, batterProfile, pitcherProfile } from './profile.js';
 import { combine, sampleOutcome, type PaOutcome } from './oddsRatio.js';
 import { emptyBatting, emptyPitching, type BattingStats, type PitchingStats } from './stats.js';
@@ -50,8 +50,8 @@ const FATIGUE_RATING_PENALTY = 0.15;
 const FATIGUE_SELECTION_PENALTY = 0.6;
 
 export interface GameResult {
-  homeTeamId: string;
-  awayTeamId: string;
+  homeClubId: string;
+  awayClubId: string;
   homeScore: number;
   awayScore: number;
   innings: number;
@@ -64,7 +64,7 @@ export interface GameResult {
 }
 
 /** 攻撃中のチームの可変状態 */
-interface TeamState {
+interface ClubState {
   roster: Roster;
   lineup: Lineup;
   orderIndex: number;
@@ -95,7 +95,7 @@ export function simulateGame(
   awayRoster: Roster,
   homeStarter: Player,
   awayStarter: Player,
-  homeTeam: Team,
+  homeClub: Club,
   rng: Rng,
   condition: PitcherCondition,
   rules: GameRules,
@@ -106,8 +106,8 @@ export function simulateGame(
   const pitching = new Map<string, PitchingStats>();
   const events: PlateAppearanceEvent[] = [];
 
-  const home = createTeamState(homeRoster, homeStarter, dh, condition);
-  const away = createTeamState(awayRoster, awayStarter, dh, condition);
+  const home = createClubState(homeRoster, homeStarter, dh, condition);
+  const away = createClubState(awayRoster, awayStarter, dh, condition);
 
   for (const state of [home, away]) {
     for (const p of state.lineup.order) statLine(batting, p.id).g += 1;
@@ -122,19 +122,19 @@ export function simulateGame(
 
   let inning = 1;
   for (; inning <= MAX_INNINGS; inning++) {
-    playHalfInning(away, home, homeTeam, rng, batting, pitching, events, inning, true);
+    playHalfInning(away, home, homeClub, rng, batting, pitching, events, inning, true);
 
     // 9回裏以降、ホームがリードしていれば裏の攻撃は不要（サヨナラ勝ちの逆）
     if (inning >= 9 && home.score > away.score) break;
 
-    playHalfInning(home, away, homeTeam, rng, batting, pitching, events, inning, false);
+    playHalfInning(home, away, homeClub, rng, batting, pitching, events, inning, false);
 
     if (inning >= 9 && home.score !== away.score) break;
   }
 
   const result: GameResult = {
-    homeTeamId: homeRoster.team.id,
-    awayTeamId: awayRoster.team.id,
+    homeClubId: homeRoster.club.id,
+    awayClubId: awayRoster.club.id,
     homeScore: home.score,
     awayScore: away.score,
     innings: Math.min(inning, MAX_INNINGS),
@@ -148,12 +148,12 @@ export function simulateGame(
   return result;
 }
 
-function createTeamState(
+function createClubState(
   roster: Roster,
   starter: Player,
   dh: boolean,
   condition: PitcherCondition,
-): TeamState {
+): ClubState {
   const { closer, setup, middle } = bullpen(roster);
 
   // 疲れている投手ほど優先度を下げる。疲労度10で能力値6点相当。
@@ -247,9 +247,9 @@ function errorRate(hands: number): number {
 }
 
 function playHalfInning(
-  offense: TeamState,
-  defense: TeamState,
-  homeTeam: Team,
+  offense: ClubState,
+  defense: ClubState,
+  homeClub: Club,
   rng: Rng,
   batting: Map<string, BattingStats>,
   pitching: Map<string, PitchingStats>,
@@ -309,7 +309,7 @@ function playHalfInning(
       batter,
       pitcher,
       defLevel.range,
-      homeTeam,
+      homeClub,
       risp,
       fatigue,
       rng,
@@ -451,7 +451,7 @@ function resolvePlateAppearance(
   batter: Player,
   pitcher: Player,
   defenseRange: number,
-  homeTeam: Team,
+  homeClub: Club,
   risp: boolean,
   fatigue: number,
   rng: Rng,
@@ -460,7 +460,7 @@ function resolvePlateAppearance(
   const pProfile = pitcherProfile(pitcher, risp, fatigue * FATIGUE_RATING_PENALTY);
   let rates = combine(bProfile, pProfile);
   rates = applyFielding(rates, defenseRange);
-  rates = applyParkFactor(rates, homeTeam.homeRunFactor);
+  rates = applyParkFactor(rates, homeClub.homeRunFactor);
   return sampleOutcome(rates, rng);
 }
 
@@ -484,7 +484,7 @@ function attemptSteal(
   return rng.chance(Math.min(Math.max(successRate, 0.3), 0.95)) ? 'success' : 'caught';
 }
 
-function scoreRun(runner: Player, offense: TeamState, batting: Map<string, BattingStats>): void {
+function scoreRun(runner: Player, offense: ClubState, batting: Map<string, BattingStats>): void {
   offense.score++;
   statLine(batting, runner.id).r += 1;
 }
@@ -501,7 +501,7 @@ function clearBases(bases: Bases): Player[] {
 function walkRunners(
   bases: Bases,
   batter: Player,
-  offense: TeamState,
+  offense: ClubState,
   batting: Map<string, BattingStats>,
 ): void {
   if (bases.first) {
@@ -518,7 +518,7 @@ function walkRunners(
 function advanceOnError(
   bases: Bases,
   batter: Player,
-  offense: TeamState,
+  offense: ClubState,
   batting: Map<string, BattingStats>,
 ): void {
   if (bases.third) scoreRun(bases.third, offense, batting);
@@ -531,7 +531,7 @@ function advanceOnError(
 function advanceOnSingle(
   bases: Bases,
   batter: Player,
-  offense: TeamState,
+  offense: ClubState,
   batting: Map<string, BattingStats>,
   rng: Rng,
 ): void {
@@ -567,7 +567,7 @@ function advanceOnSingle(
 function advanceOnDouble(
   bases: Bases,
   batter: Player,
-  offense: TeamState,
+  offense: ClubState,
   batting: Map<string, BattingStats>,
   rng: Rng,
 ): void {
@@ -596,7 +596,7 @@ function advanceOnDouble(
 function resolveBattedOut(
   bases: Bases,
   batter: Player,
-  offense: TeamState,
+  offense: ClubState,
   batting: Map<string, BattingStats>,
   outs: number,
   rng: Rng,
@@ -648,8 +648,8 @@ function resolveBattedOut(
  * リードしている9回は守護神を投入する。
  */
 function maybeChangePitcher(
-  defense: TeamState,
-  offense: TeamState,
+  defense: ClubState,
+  offense: ClubState,
   inning: number,
   rng: Rng,
   onPitcherEntered: (p: Player) => void,
@@ -722,8 +722,8 @@ function takeRandom(arms: Player[], from: number, to: number, rng: Rng): Player 
 /** 勝敗投手・セーブの割り当て（簡略版） */
 function assignDecisions(
   result: GameResult,
-  home: TeamState,
-  away: TeamState,
+  home: ClubState,
+  away: ClubState,
   pitching: Map<string, PitchingStats>,
 ): void {
   if (result.tie) return;

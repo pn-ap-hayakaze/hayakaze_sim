@@ -30,7 +30,7 @@ export function wobaOf(r: OutcomeRates): number {
 const AVERAGE_PITCHER: Player = {
   id: 'avg-pitcher',
   name: '平均投手',
-  teamId: '',
+  clubId: '',
   age: 27,
   throws: 'R',
   bats: 'R',

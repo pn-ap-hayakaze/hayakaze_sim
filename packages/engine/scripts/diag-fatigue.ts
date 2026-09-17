@@ -29,9 +29,9 @@ while (!isSeasonOver(season)) {
 
   const todaysGames = season.scheduleByDay.get(season.currentDay) ?? [];
   for (const g of todaysGames) {
-    for (const teamId of [g.homeTeamId, g.awayTeamId]) {
-      const roster = season.rosters.get(teamId)!;
-      const sp = rotationFor(roster, season.gamesPlayed.get(teamId)!);
+    for (const clubId of [g.homeClubId, g.awayClubId]) {
+      const roster = season.rosters.get(clubId)!;
+      const sp = rotationFor(roster, season.gamesPlayed.get(clubId)!);
       spFatigueAtStart.push(preGame.get(sp.id) ?? 0);
     }
   }

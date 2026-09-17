@@ -15,7 +15,7 @@ export interface LeagueLevel {
   era: number;
   whip: number;
   /** 1チーム1シーズンあたりの盗塁企図（成功 + 失敗） */
-  stealAttemptsPerTeam: number;
+  stealAttemptsPerClub: number;
   stealSuccessRate: number;
   kRate: number;
   bbRate: number;
@@ -25,17 +25,17 @@ export interface LeagueLevel {
 export function leagueLevel(season: SeasonState): LeagueLevel {
   const b = sumBatting(season.battingStats.values());
   const p = sumPitching(season.pitchingStats.values());
-  const teams = season.rosters.size;
-  const teamGames = season.results.length * 2;
+  const clubs = season.rosters.size;
+  const clubGames = season.results.length * 2;
   const attempts = b.sb + b.cs;
   return {
     avg: avg(b),
     obp: obp(b),
     ops: ops(b),
-    runsPerGame: teamGames > 0 ? b.r / teamGames : 0,
+    runsPerGame: clubGames > 0 ? b.r / clubGames : 0,
     era: era(p),
     whip: whip(p),
-    stealAttemptsPerTeam: teams > 0 ? attempts / teams : 0,
+    stealAttemptsPerClub: clubs > 0 ? attempts / clubs : 0,
     stealSuccessRate: attempts > 0 ? b.sb / attempts : 0,
     kRate: b.pa > 0 ? b.so / b.pa : 0,
     bbRate: b.pa > 0 ? b.bb / b.pa : 0,

@@ -56,8 +56,8 @@ describe('deriveSeed', () => {
 /** 試合の結果を比較しやすい形に落とす */
 function summarize(r: GameResult) {
   return {
-    home: r.homeTeamId,
-    away: r.awayTeamId,
+    home: r.homeClubId,
+    away: r.awayClubId,
     score: `${r.homeScore}-${r.awayScore}`,
     innings: r.innings,
     pa: r.events.length,
@@ -115,10 +115,10 @@ describe('試合ごとの乱数の独立性', () => {
   });
 
   it('翌日のうち摂動した試合の2球団が関わらない試合は同一', () => {
-    const involved = new Set([targetGame.homeTeamId, targetGame.awayTeamId]);
+    const involved = new Set([targetGame.homeClubId, targetGame.awayClubId]);
     const games = normal.schedule.filter(
       (g) =>
-        g.day === PERTURB_DAY + 1 && !involved.has(g.homeTeamId) && !involved.has(g.awayTeamId),
+        g.day === PERTURB_DAY + 1 && !involved.has(g.homeClubId) && !involved.has(g.awayClubId),
     );
     expect(games.length).toBeGreaterThan(0);
     for (const g of games) {

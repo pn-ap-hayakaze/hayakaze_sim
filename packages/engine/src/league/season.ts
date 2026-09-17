@@ -12,7 +12,7 @@ import { generateSchedule, groupByDay, type ScheduledGame } from './schedule.js'
 import { rotationFor } from './lineup.js';
 import { simulateGame, type GameResult, type PitcherCondition } from '../sim/game.js';
 import type { Player } from '../player/ratings.js';
-import { NPB_DEFAULT_CONFIG, type Team } from '../data/teams.js';
+import { NPB_DEFAULT_CONFIG, type Club } from '../data/clubs.js';
 import { leagueOf, validateConfig, type LeagueConfig } from './config.js';
 import {
   addBatting,
@@ -23,8 +23,8 @@ import {
   type PitchingStats,
 } from '../sim/stats.js';
 
-export interface TeamRecord {
-  teamId: string;
+export interface ClubRecord {
+  clubId: string;
   wins: number;
   losses: number;
   ties: number;
@@ -74,14 +74,14 @@ export interface SeasonState {
   /** リーグ構成。DH の有無・試合数・順位表はここから導出する */
   config: LeagueConfig;
   /** 球団ID → 球団 */
-  teams: Map<string, Team>;
+  clubs: Map<string, Club>;
   rosters: Map<string, Roster>;
   schedule: ScheduledGame[];
   scheduleByDay: Map<number, ScheduledGame[]>;
   /** 次に進める日（1始まり） */
   currentDay: number;
   lastDay: number;
-  records: Map<string, TeamRecord>;
+  records: Map<string, ClubRecord>;
   battingStats: Map<string, BattingStats>;
   pitchingStats: Map<string, PitchingStats>;
   /** 球団ごとの消化試合数。ローテーション決定に使う */
@@ -108,27 +108,27 @@ export function createSeason(seed: number, options: SeasonOptions = {}): SeasonS
   const config = options.config ?? NPB_DEFAULT_CONFIG;
   validateConfig(config);
 
-  const teams = new Map<string, Team>(config.teams.map((t) => [t.id, t]));
+  const clubs = new Map<string, Club>(config.clubs.map((t) => [t.id, t]));
   const rosters = new Map<string, Roster>();
   const players = new Map<string, Player>();
-  for (const roster of generateLeague(deriveSeed(seed, RNG_PURPOSE.ROSTER), config.teams)) {
-    rosters.set(roster.team.id, roster);
+  for (const roster of generateLeague(deriveSeed(seed, RNG_PURPOSE.ROSTER), config.clubs)) {
+    rosters.set(roster.club.id, roster);
     for (const p of [...roster.batters, ...roster.pitchers]) players.set(p.id, p);
   }
 
   const schedule = generateSchedule(deriveSeed(seed, RNG_PURPOSE.SCHEDULE, year), config);
-  const records = new Map<string, TeamRecord>();
+  const records = new Map<string, ClubRecord>();
   const gamesPlayed = new Map<string, number>();
-  for (const teamId of rosters.keys()) {
-    records.set(teamId, {
-      teamId,
+  for (const clubId of rosters.keys()) {
+    records.set(clubId, {
+      clubId,
       wins: 0,
       losses: 0,
       ties: 0,
       runsScored: 0,
       runsAllowed: 0,
     });
-    gamesPlayed.set(teamId, 0);
+    gamesPlayed.set(clubId, 0);
   }
 
   return {
@@ -136,7 +136,7 @@ export function createSeason(seed: number, options: SeasonOptions = {}): SeasonS
     year,
     streams,
     config,
-    teams,
+    clubs,
     rosters,
     schedule,
     scheduleByDay: groupByDay(schedule),
@@ -190,23 +190,23 @@ export function advanceOneDay(season: SeasonState): GameResult[] {
   const condition = pitcherCondition(season);
 
   for (const game of today) {
-    const homeRoster = season.rosters.get(game.homeTeamId)!;
-    const awayRoster = season.rosters.get(game.awayTeamId)!;
+    const homeRoster = season.rosters.get(game.homeClubId)!;
+    const awayRoster = season.rosters.get(game.awayClubId)!;
 
-    const homeStarter = rotationFor(homeRoster, season.gamesPlayed.get(game.homeTeamId)!);
-    const awayStarter = rotationFor(awayRoster, season.gamesPlayed.get(game.awayTeamId)!);
+    const homeStarter = rotationFor(homeRoster, season.gamesPlayed.get(game.homeClubId)!);
+    const awayStarter = rotationFor(awayRoster, season.gamesPlayed.get(game.awayClubId)!);
 
     // 試合ごとに独立した乱数。他の試合の乱数消費に影響されない
     const rng = season.streams.game(season.year, game.day, game.id);
-    const homeTeam = season.teams.get(game.homeTeamId)!;
+    const homeClub = season.clubs.get(game.homeClubId)!;
     // DH の有無は本拠地のリーグの設定に従う
-    const rules = { dh: leagueOf(season.config, game.homeTeamId).dh };
+    const rules = { dh: leagueOf(season.config, game.homeClubId).dh };
     const result = simulateGame(
       homeRoster,
       awayRoster,
       homeStarter,
       awayStarter,
-      homeTeam,
+      homeClub,
       rng,
       condition,
       rules,
@@ -241,8 +241,8 @@ export function isSeasonOver(season: SeasonState): boolean {
 }
 
 function applyResult(season: SeasonState, result: GameResult): void {
-  const home = season.records.get(result.homeTeamId)!;
-  const away = season.records.get(result.awayTeamId)!;
+  const home = season.records.get(result.homeClubId)!;
+  const away = season.records.get(result.awayClubId)!;
 
   home.runsScored += result.homeScore;
   home.runsAllowed += result.awayScore;
@@ -260,8 +260,8 @@ function applyResult(season: SeasonState, result: GameResult): void {
     home.losses++;
   }
 
-  season.gamesPlayed.set(result.homeTeamId, season.gamesPlayed.get(result.homeTeamId)! + 1);
-  season.gamesPlayed.set(result.awayTeamId, season.gamesPlayed.get(result.awayTeamId)! + 1);
+  season.gamesPlayed.set(result.homeClubId, season.gamesPlayed.get(result.homeClubId)! + 1);
+  season.gamesPlayed.set(result.awayClubId, season.gamesPlayed.get(result.awayClubId)! + 1);
 
   for (const [playerId, stats] of result.batting) {
     let target = season.battingStats.get(playerId);
@@ -282,19 +282,19 @@ function applyResult(season: SeasonState, result: GameResult): void {
 }
 
 /** 勝率。引き分けは分母から除く（NPB方式） */
-export function winPct(record: TeamRecord): number {
+export function winPct(record: ClubRecord): number {
   const decided = record.wins + record.losses;
   return decided > 0 ? record.wins / decided : 0;
 }
 
 /** リーグ順位表 */
-export function standings(season: SeasonState, leagueId: string): TeamRecord[] {
+export function standings(season: SeasonState, leagueId: string): ClubRecord[] {
   return [...season.records.values()]
-    .filter((r) => season.teams.get(r.teamId)!.league === leagueId)
+    .filter((r) => season.clubs.get(r.clubId)!.league === leagueId)
     .sort((a, b) => winPct(b) - winPct(a));
 }
 
 /** 首位とのゲーム差 */
-export function gamesBehind(leader: TeamRecord, team: TeamRecord): number {
-  return (leader.wins - team.wins + (team.losses - leader.losses)) / 2;
+export function gamesBehind(leader: ClubRecord, club: ClubRecord): number {
+  return (leader.wins - club.wins + (club.losses - leader.losses)) / 2;
 }

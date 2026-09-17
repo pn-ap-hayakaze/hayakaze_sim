@@ -14,7 +14,7 @@ const season = createSeason(Number(process.argv[2] ?? 20260915));
 advanceToEnd(season);
 
 for (const roster of [...season.rosters.values()].slice(0, 3)) {
-  console.log(`\n=== ${roster.team.name} ===`);
+  console.log(`\n=== ${roster.club.name} ===`);
   console.log('役割 選手          能力  スタミナ  登板  投球回  防御率  平均球数/登板');
   const relievers = roster.pitchers
     .filter((p) => p.pitcherRole !== 'SP')
