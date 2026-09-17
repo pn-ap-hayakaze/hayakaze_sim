@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+/* デザイントークン。中立パレットに GM 球団のアクセント1色（GM 球団は後続作業で入る） */
+@theme {
+  --color-accent: #1d4ed8;
+  --color-good: #15803d;
+  --color-poor: #b91c1c;
+}
+
+body {
+  @apply bg-neutral-50 text-neutral-900;
+}
