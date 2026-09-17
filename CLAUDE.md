@@ -1,225 +1,232 @@
-# CLAUDE.md (プロジェクトメモリ)
+# CLAUDE.md (Project Memory)
 
-## 概要
-開発を進めるうえで遵守すべき標準ルールを定義します。
+## Overview
+Defines the standard rules to follow while developing this project.
 
-## プロジェクト構造
+## Document Language
 
-### ドキュメントの分類
+- Documents such as `README.md`, `CLAUDE.md` and everything under `docs/` are written in **English**.
+- For each of them, keep a Japanese counterpart for the user: `README.ja.md`, `CLAUDE.ja.md`, `docs/<name>.ja.md`. The two files carry the same content; update them together so they never drift.
+- Claude Code automatically loads only the English documents. The `.ja.md` files are for human readers.
+- Conversation with the user is in Japanese. Code comments follow the existing style of the file.
+- Working documents under `.steering/` are not auto-loaded and may be written in the language the work was done in.
 
-#### 1. 永続的ドキュメント（`docs/`）
+## Project Structure
 
-アプリケーション全体の「**何を作るか**」「**どう作るか**」を定義する恒久的なドキュメント。
-アプリケーションの基本設計や方針が変わらない限り更新されません。
+### Document Categories
 
-- **product-requirements.md** - プロダクト要求定義書
-  - プロダクトビジョンと目的
-  - ターゲットユーザーと課題・ニーズ
-  - 主要な機能一覧
-  - 成功の定義
-  - ビジネス要件
-  - ユーザーストーリー
-  - 受け入れ条件
-  - 機能要件
-  - 非機能要件
+#### 1. Permanent documents (`docs/`)
 
-- **functional-design.md** - 機能設計書
-  - 機能ごとのアーキテクチャ
-  - システム構成図
-  - データモデル定義（ER図含む）
-  - コンポーネント設計
-  - ユースケース図、画面遷移図、ワイヤフレーム
-  - API設計（将来的にバックエンドと連携する場合）
+Permanent documents that define **what** the application is and **how** it is built.
+They are not updated unless the basic design or policy of the application changes.
 
-- **architecture.md** - 技術仕様書
-  - テクノロジースタック
-  - 開発ツールと手法
-  - 技術的制約と要件
-  - パフォーマンス要件
+- **product-requirements.md** - Product requirements
+  - Product vision and purpose
+  - Target users, their problems and needs
+  - Main feature list
+  - Definition of success
+  - Business requirements
+  - User stories
+  - Acceptance criteria
+  - Functional requirements
+  - Non-functional requirements
 
-- **repository-structure.md** - リポジトリ構造定義書
-  - フォルダ・ファイル構成
-  - ディレクトリの役割
-  - ファイル配置ルール
+- **functional-design.md** - Functional design
+  - Architecture per feature
+  - System diagrams
+  - Data model definitions (including ER diagrams)
+  - Component design
+  - Use case diagrams, screen transitions, wireframes
+  - API design (if a backend is added later)
 
-- **development-guidelines.md** - 開発ガイドライン
-  - コーディング規約
-  - 命名規則
-  - スタイリング規約
-  - テスト規約
-  - Git規約
+- **architecture.md** - Technical specification
+  - Technology stack
+  - Development tools and methods
+  - Technical constraints and requirements
+  - Performance requirements
 
-- **glossary.md** - ユビキタス言語定義
-  - ドメイン用語の定義
-  - ビジネス用語の定義
-  - UI/UX用語の定義
-  - 英語・日本語対応表
-  - コード上の命名規則
+- **repository-structure.md** - Repository structure
+  - Folder and file layout
+  - Role of each directory
+  - File placement rules
 
+- **development-guidelines.md** - Development guidelines
+  - Coding conventions
+  - Naming conventions
+  - Styling conventions
+  - Testing conventions
+  - Git conventions
 
-#### 2. 作業単位のドキュメント（`.steering/[YYYYMMDD]-[開発タイトル]/`）
+- **glossary.md** - Ubiquitous language
+  - Domain terms
+  - Business terms
+  - UI/UX terms
+  - English–Japanese correspondence table
+  - Naming rules in code
 
-特定の開発作業における「**今回何をするか**」を定義する一時的なステアリングファイル。
-作業完了後は参照用として保持されますが、新しい作業では新しいディレクトリを作成します。
+#### 2. Work-unit documents (`.steering/[YYYYMMDD]-[title]/`)
 
-- **requirements.md** - 今回の作業の要求内容
-  - 変更・追加する機能の説明
-  - ユーザーストーリー
-  - 受け入れ条件
-  - 制約事項
+Temporary steering files that define **what this piece of work does**.
+They are kept for reference after the work is done; new work gets a new directory.
 
-- **design.md** - 変更内容の設計
-  - 実装アプローチ
-  - 変更するコンポーネント
-  - データ構造の変更
-  - 影響範囲の分析
+- **requirements.md** - Requirements for this work
+  - Description of the feature to change or add
+  - User stories
+  - Acceptance criteria
+  - Constraints
 
-- **tasklist.md** - タスクリスト
-  - 具体的な実装タスク
-  - タスクの進捗状況
-  - 完了条件
+- **design.md** - Design of the change
+  - Implementation approach
+  - Components to change
+  - Data structure changes
+  - Impact analysis
 
-### ステアリングディレクトリの命名規則
+- **tasklist.md** - Task list
+  - Concrete implementation tasks
+  - Progress of each task
+  - Completion criteria
+
+### Steering directory naming
 
 ```
-.steering/[YYYYMMDD]-[開発タイトル]/
+.steering/[YYYYMMDD]-[title]/
 ```
 
-**例:**
-- `.steering/20250103-feat-add-tag/` - 機能追加
-- `.steering/20250103-fix-filter-bug/` - バグ修正
-- `.steering/20250103-rfct-add-tag/` - リファクタ
-- `.steering/20250103-rule-naming-convension/` - ルール
+**Examples:**
+- `.steering/20250103-feat-add-tag/` - feature addition
+- `.steering/20250103-fix-filter-bug/` - bug fix
+- `.steering/20250103-rfct-add-tag/` - refactoring
+- `.steering/20250103-rule-naming-convension/` - rule
 
-## 開発プロセス
+## Development Process
 
-### 初回セットアップ時の手順
+### Initial setup
 
-#### 1. フォルダ作成
+#### 1. Create folders
 ```bash
 mkdir -p docs
 mkdir -p .steering
 ```
 
-#### 2. 永続的ドキュメント作成（`docs/`）
+#### 2. Create the permanent documents (`docs/`)
 
-アプリケーション全体の設計を定義します。
-各ドキュメントを作成後、必ず確認・承認を得てから次に進みます。
+Define the design of the whole application.
+After creating each document, obtain confirmation and approval before moving to the next one.
 
-1. `docs/product-requirements.md` - プロダクト要求定義書
-2. `docs/functional-design.md` - 機能設計書
-3. `docs/architecture.md` - 技術仕様書
-4. `docs/repository-structure.md` - リポジトリ構造定義書
-5. `docs/development-guidelines.md` - 開発ガイドライン
-6. `docs/glossary.md` - ユビキタス言語定義
+1. `docs/product-requirements.md` - Product requirements
+2. `docs/functional-design.md` - Functional design
+3. `docs/architecture.md` - Technical specification
+4. `docs/repository-structure.md` - Repository structure
+5. `docs/development-guidelines.md` - Development guidelines
+6. `docs/glossary.md` - Ubiquitous language
 
-**重要：** 1ファイルごとに作成後、必ず確認・承認を得てから次のファイル作成を行う
+**Important:** create one file at a time and get approval before creating the next one.
 
-#### 3. 初回実装用のステアリングファイル作成
+#### 3. Create the steering files for the initial implementation
 
-初回実装用のディレクトリを作成し、実装に必要なドキュメントを配置します。
+Create the directory for the initial implementation and place the documents needed for it.
 
 ```bash
 mkdir -p .steering/[YYYYMMDD]-initial-implementation
 ```
 
-作成するドキュメント：
-1. `.steering/[YYYYMMDD]-initial-implementation/requirements.md` - 初回実装の要求
-2. `.steering/[YYYYMMDD]-initial-implementation/design.md` - 実装設計
-3. `.steering/[YYYYMMDD]-initial-implementation/tasklist.md` - 実装タスク
+Documents to create:
+1. `.steering/[YYYYMMDD]-initial-implementation/requirements.md` - Requirements
+2. `.steering/[YYYYMMDD]-initial-implementation/design.md` - Design
+3. `.steering/[YYYYMMDD]-initial-implementation/tasklist.md` - Tasks
 
-#### 4. 環境セットアップ
+#### 4. Environment setup
 
-#### 5. 実装開始
+#### 5. Start implementing
 
-`.steering/[YYYYMMDD]-initial-implementation/tasklist.md` に基づいて実装を進めます。
+Implement according to `.steering/[YYYYMMDD]-initial-implementation/tasklist.md`.
 
-#### 6. 品質チェック
+#### 6. Quality checks
 
-### 機能追加・修正時の手順
+### Adding or changing features
 
-#### 1. 影響分析
+#### 1. Impact analysis
 
-- 永続的ドキュメント（`docs/`）への影響を確認
-- 変更が基本設計に影響する場合は `docs/` を更新
+- Check the impact on the permanent documents (`docs/`)
+- If the change affects the basic design, update `docs/`
 
-#### 2. ステアリングディレクトリ作成
+#### 2. Create a steering directory
 
-新しい作業用のディレクトリを作成します。
+Create a directory for the new work.
 
 ```bash
-mkdir -p .steering/[YYYYMMDD]-[開発タイトル]
+mkdir -p .steering/[YYYYMMDD]-[title]
 ```
 
-**例：**
+**Example:**
 ```bash
 mkdir -p .steering/20250115-add-tag-feature
 ```
 
-#### 3. 作業ドキュメント作成
+#### 3. Create the work documents
 
-作業単位のドキュメントを作成します。
-各ドキュメント作成後、必ず確認・承認を得てから次に進みます。
+Create the work-unit documents.
+After creating each document, obtain confirmation and approval before moving to the next one.
 
-1. `.steering/[YYYYMMDD]-[開発タイトル]/requirements.md` - 要求内容
-2. `.steering/[YYYYMMDD]-[開発タイトル]/design.md` - 設計
-3. `.steering/[YYYYMMDD]-[開発タイトル]/tasklist.md` - タスクリスト
+1. `.steering/[YYYYMMDD]-[title]/requirements.md` - Requirements
+2. `.steering/[YYYYMMDD]-[title]/design.md` - Design
+3. `.steering/[YYYYMMDD]-[title]/tasklist.md` - Task list
 
-**重要：** 1ファイルごとに作成後、必ず確認・承認を得てから次のファイル作成を行う
+**Important:** create one file at a time and get approval before creating the next one.
 
-#### 4. 永続的ドキュメント更新（必要な場合のみ）
+#### 4. Update permanent documents (only when needed)
 
-変更が基本設計に影響する場合、該当する `docs/` 内のドキュメントを更新します。
+If the change affects the basic design, update the relevant documents under `docs/`.
 
-#### 5. 実装開始
+#### 5. Start implementing
 
-`.steering/[YYYYMMDD]-[開発タイトル]/tasklist.md` に基づいて実装を進めます。
+Implement according to `.steering/[YYYYMMDD]-[title]/tasklist.md`.
 
-#### 6. 品質チェック
+#### 6. Quality checks
 
-## ドキュメント管理の原則
+## Document Management Principles
 
-### 永続的ドキュメント（`docs/`）
-- アプリケーションの基本設計を記述
-- 頻繁に更新されない
-- 大きな設計変更時のみ更新
-- プロジェクト全体の「北極星」として機能
+### Permanent documents (`docs/`)
+- Describe the basic design of the application
+- Rarely updated
+- Updated only on major design changes
+- Act as the "north star" of the whole project
 
-### 作業単位のドキュメント（`.steering/`）
-- 特定の作業・変更に特化
-- 作業ごとに新しいディレクトリを作成
-- 作業完了後は履歴として保持
-- 変更の意図と経緯を記録
+### Work-unit documents (`.steering/`)
+- Specific to one piece of work or change
+- A new directory for each piece of work
+- Kept as history after the work is done
+- Record the intent and the reasoning behind the change
 
-## 図表・ダイアグラムの記載ルール
+## Diagram Rules
 
-### 記載場所
-設計図やダイアグラムは、関連する永続的ドキュメント内に直接記載します。
-独立したdiagramsフォルダは作成せず、手間を最小限に抑えます。
+### Where to put them
+Design diagrams are written directly inside the related permanent document.
+Do not create a separate diagrams folder; keep the overhead minimal.
 
-**配置例：**
-- ER図、データモデル図 → `functional-design.md` 内に記載
-- ユースケース図 → `functional-design.md` または `product-requirements.md` 内に記載
-- 画面遷移図、ワイヤフレーム → `functional-design.md` 内に記載
-- システム構成図 → `functional-design.md` または `architecture.md` 内に記載
+**Placement examples:**
+- ER diagrams, data model diagrams → in `functional-design.md`
+- Use case diagrams → in `functional-design.md` or `product-requirements.md`
+- Screen transitions, wireframes → in `functional-design.md`
+- System diagrams → in `functional-design.md` or `architecture.md`
 
-### 記述形式
-1. **Mermaid記法（推奨）**
-   - Markdownに直接埋め込める
-   - バージョン管理が容易
-   - ツール不要で編集可能
+### Format
+1. **Mermaid (recommended)**
+   - Embeds directly in Markdown
+   - Easy to version-control
+   - Editable without tools
 
 ```mermaid
 graph TD
-    A[ユーザー] --> B[タスク作成]
-    B --> C[タスク一覧]
-    C --> D[タスク編集]
-    C --> E[タスク削除]
+    A[User] --> B[Create task]
+    B --> C[Task list]
+    C --> D[Edit task]
+    C --> E[Delete task]
 ```
 
-2. **ASCII アート**
-   - シンプルな図表に使用
-   - テキストエディタで編集可能
+2. **ASCII art**
+   - For simple diagrams
+   - Editable in a text editor
 
 ```
 ┌─────────────┐
@@ -232,21 +239,21 @@ graph TD
 └─────────────┘
 ```
 
-3. **画像ファイル（必要な場合のみ）**
-   - 複雑なワイヤフレームやモックアップ
-   - `docs/images/` フォルダに配置
-   - PNG または SVG 形式を推奨
+3. **Image files (only when necessary)**
+   - Complex wireframes or mockups
+   - Place under `docs/images/`
+   - PNG or SVG recommended
 
-### 図表の更新
-- 設計変更時は対応する図表も同時に更新
-- 図表とコードの乖離を防ぐ
+### Updating diagrams
+- When the design changes, update the corresponding diagrams at the same time
+- Prevent drift between diagrams and code
 
-## 注意事項
+## Notes
 
-- ドキュメントの作成・更新は段階的に行い、各段階で承認を得る
-- `.steering/` のディレクトリ名は日付と開発タイトルで明確に識別できるようにする
-- 永続的ドキュメントと作業単位のドキュメントを混同しない
-- コード変更後は必ずリント・型チェックを実施する
-- 共通のデザインシステム（Tailwind CSS）を使用して統一感を保つ
-- セキュリティを考慮したコーディング（XSS対策、入力バリデーションなど）
-- 図表は必要最小限に留め、メンテナンスコストを抑える
+- Create and update documents step by step, getting approval at each step
+- Name `.steering/` directories so the date and the title identify the work clearly
+- Do not mix permanent documents with work-unit documents
+- Always run lint and type checks after changing code
+- Use the shared design system (Tailwind CSS) for a consistent look
+- Code with security in mind (XSS protection, input validation, etc.)
+- Keep diagrams to the minimum needed to keep maintenance cost low
