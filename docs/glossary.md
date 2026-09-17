@@ -39,7 +39,7 @@ identifier used in `packages/engine` and `packages/app`.
 | 支配下（選手） | controlled (player) | `controlled`, `controlledMax` | Under contract with a club; cap 70 |
 | 一軍登録 / 出場選手登録 | active roster registration | `level: 'ACTIVE'`, `register` | Eligible for first-team games; limit 31 |
 | ベンチ入り | dugout | `dugout` | The 26 chosen from the active roster on game day |
-| 二軍 | farm (team) | `level: 'FARM'` | Controlled players not on the active roster; simplified layer in Season 1 |
+| 二軍 | farm (team) | `level: 'FARM'` | Controlled players not on the active roster; simplified layer in v1 |
 | 抹消 / 登録抹消 | deactivation | `deactivate`, `deactivatedOnDay` | Removal from the active roster; 10 days before re-registration |
 | 10日ルール | ten-day rule | `REREGISTRATION_DAYS` | Re-registration allowed from the 10th day counting the deactivation day |
 | 投げ抹消 | pitch-and-deactivate | `pitchAndDeactivate` | Deactivating a starter right after a start to return on a longer interval |
@@ -49,7 +49,7 @@ identifier used in `packages/engine` and `packages/app`.
 | 外国人枠 | foreign-player quota | `foreignActive`, `foreignMaxPitchers`, `foreignMaxPositionPlayers` | Limit on foreign players on the active roster (5 default, 4 in the agreement), with a pitcher/position-player breakdown |
 | 外国人区分 | foreign status | `foreignStatus: 'DOMESTIC' \| 'FOREIGN' \| 'FOREIGN_EXEMPT'` | Whether a player counts against the quota |
 | 枠除外 | quota exempt | `'FOREIGN_EXEMPT'` | Foreign player who does not count (e.g. three years at a Japanese high school) |
-| 育成（契約・ドラフト） | developmental (contract / draft) | `ikusei` | Not in Season 1; term reserved |
+| 育成（契約・ドラフト） | developmental (contract / draft) | `ikusei` | Not in v1; term reserved |
 | ドラフト / 新人選手選択会議 | draft | `Draft` | Annual amateur selection in the offseason |
 | 入札抽選 | bidding lottery | `BidRound`, `lottery` | Round 1: simultaneous bids, lottery among clubs bidding on the same player |
 | 単独指名 | single bid | `singleBid` | Only one club bid on the player in that round |
@@ -123,7 +123,7 @@ identifier used in `packages/engine` and `packages/app`.
 | ソフトゲート | soft gate | `softGate` | Probability-lowering rule on appearances in the last N days |
 | 完投 | complete game | `completeGame` | Starter pitches the whole game |
 | 中6日 | six days' rest | `daysRest` | Standard NPB starter interval |
-| 故障 | injury | `Injury`, `currentInjury` | Days out; no body part in Season 1 |
+| 故障 | injury | `Injury`, `currentInjury` | Days out; no body part in v1 |
 | 故障歴 | injury history | `health.history` | Days lost this season, last season, two seasons ago |
 | 離脱日数 | days out | `daysRemaining`, `daysOut` | Right-skewed distribution |
 | 球数閾値 | pitch-count threshold | `PITCH_THRESHOLD` | 115–120 pitches; step increase in injury risk |
@@ -175,7 +175,7 @@ identifier used in `packages/engine` and `packages/app`.
 | 方針 | policy | `Policy` | GM's standing instructions: pitch limit, ace handling, running |
 | 架空リーグ | fictional league | `generateGame` | Default: real cities, fictional clubs and players |
 | 実名データ | real-name data | `importData` | User-supplied; never bundled |
-| シーズン1 | Season 1 | — | First playable release scope |
+| v1 | v1 | — | First playable release scope |
 | 後続フェーズ | later phase | — | Contracts, coaches, farm simulation, batted-ball layer, desktop |
 | 説明可能性 | explainability | — | Every displayed number traceable to a mechanism |
 | 較正目標 | calibration target | — | NPB level ranges in `product-requirements.md` section 7 |
