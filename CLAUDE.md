@@ -156,13 +156,13 @@ Implement according to `.steering/[YYYYMMDD]-initial-implementation/tasklist.md`
 One steering work unit = one GitHub issue = one branch = one pull request.
 
 1. Create a GitHub issue. Title = the steering title; label = the kind (`feat`, `fix`, `rfct`, `rule`, `docs`);
-   milestone = the season the work belongs to (e.g. `Season 1`); body links to the steering directory.
+   milestone = the release version the work belongs to (e.g. `v1`); body links to the steering directory.
 2. Create a branch from `main` named `<kind>/<issue number>-<title>` and do all work for this unit on it,
    including the steering documents.
 3. Create the steering directory and write the issue number in the header of `requirements.md` (`Issue: #N`).
 
 ```bash
-gh issue create --title "..." --label feat --milestone "Season 1"
+gh issue create --title "..." --label feat --milestone "v1"
 git checkout -b feat/12-add-tag-feature
 mkdir -p .steering/[YYYYMMDD]-[kind]-[title]
 ```

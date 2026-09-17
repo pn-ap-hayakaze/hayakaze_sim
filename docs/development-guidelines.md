@@ -116,7 +116,7 @@ Baseball abbreviations in code follow common sabermetric usage: `pa`, `ab`, `h`,
 ### 5.1 Issues, milestones and branches
 
 - **One steering work unit = one issue = one branch = one pull request.**
-- Milestones are seasons (`Season 1`, …). Every issue belongs to the milestone of the release scope it serves.
+- Milestones are release versions (`v1`, …). Every issue belongs to the milestone of the release scope it serves.
 - The issue is created when the steering directory is created: title = steering title, label = kind (`feat`, `fix`,
   `rfct`, `rule`, `docs`), body links to the steering directory. `requirements.md` records `Issue: #N` in its header.
 - `main` is always deployable; CI must be green.

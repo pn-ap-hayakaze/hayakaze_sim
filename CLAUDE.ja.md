@@ -158,13 +158,13 @@ mkdir -p .steering/[YYYYMMDD]-initial-implementation
 steering の作業単位1つ = GitHub issue 1つ = ブランチ1つ = プルリクエスト1つ。
 
 1. GitHub issue を作る。タイトル = steering のタイトル、ラベル = 種別（`feat`、`fix`、`rfct`、`rule`、`docs`）、
-   マイルストーン = 作業が属するシーズン（例 `Season 1`）、本文に steering ディレクトリへのリンク。
+   マイルストーン = 作業が属するリリースバージョン（例 `v1`）、本文に steering ディレクトリへのリンク。
 2. `main` から `<種別>/<issue番号>-<タイトル>` の名前でブランチを作り、steering の文書を含むこの作業単位の
    すべてをそのブランチで行う。
 3. ステアリングディレクトリを作り、`requirements.md` のヘッダに issue 番号を書く（`Issue: #N`）。
 
 ```bash
-gh issue create --title "..." --label feat --milestone "Season 1"
+gh issue create --title "..." --label feat --milestone "v1"
 git checkout -b feat/12-add-tag-feature
 mkdir -p .steering/[YYYYMMDD]-[種別]-[開発タイトル]
 ```
