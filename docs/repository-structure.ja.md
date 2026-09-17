@@ -66,7 +66,6 @@ packages/app/
 ├── package.json                     name: @hayakaze/app。scripts: dev, build, preview, test, typecheck, lint
 ├── index.html                       CSP メタ、ルート要素
 ├── vite.config.ts                   GitHub Pages の base パス、Worker 設定
-├── tailwind.config.ts, postcss.config.js
 ├── public/                          favicon、フォント（自前配信）
 └── src/
     ├── main.tsx                     エントリ。<App/> をマウント
@@ -84,7 +83,7 @@ packages/app/
     │   ├── components/              共有: DataTable, PercentileBar, RatingCell, GradeCell, Dialog, ...
     │   ├── format/                  数値と日付の書式（打率 .285、防御率 2.85、6月12日）
     │   └── strings/                 UI 文言（日本語）。画面ごとに1モジュール
-    └── styles/                      tailwind.css、デザイントークン
+    └── styles/                      tailwind.css（Tailwind v4: `@import` と `@theme` トークン。tailwind.config / postcss.config は持たない）
 ```
 
 ## 2. 各ディレクトリの役割

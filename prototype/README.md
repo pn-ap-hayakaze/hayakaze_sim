@@ -1,5 +1,8 @@
 # Engine Validation Prototype
 
+> **Frozen (2026-09-17).** The engine, tests and scripts have been ported to `packages/engine`; this directory is kept only as the
+> calibration reference until `docs/repository-structure.md` section 4 step 5 removes it. Do not add mechanics here.
+
 A prototype that implements **only the simulation part** of the NPB pennant-race simulation ahead of
 everything else, to confirm that the produced statistics are close to the real NPB.
 No UI, no save files, no GM features.

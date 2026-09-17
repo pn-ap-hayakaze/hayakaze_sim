@@ -13,7 +13,7 @@ identifier used in `packages/engine` and `packages/app`.
 
 | Japanese | English | Code | Definition |
 |---|---|---|---|
-| リーグ構成 | league configuration | `LeagueConfig` | Clubs, leagues, DH per league, games per matchup, roster limits, postseason format. All counts derive from it |
+| リーグ構成 | league configuration | `LeagueConfig`, `leagueOf`, `clubsInLeague`, `gamesPerClub` | Clubs, leagues, DH per league, games per matchup, roster limits, postseason format. All counts derive from it |
 | リーグ | league | `LeagueDefinition`, `leagueId` | A group of clubs that play each other most; default Central and Pacific |
 | 球団 | club | `Club`, `clubId` | A team as an organisation. "Team" is avoided in new code except where the prototype's `Team` type survives |
 | 本拠地 | home city | `city` | Real city name |

@@ -1,0 +1,26 @@
+{
+  "name": "@hayakaze/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NPB ペナントレース GM シミュレーションのエンジン（DOM・Node に依存しない純粋な TypeScript）",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.scripts.json",
+    "lint": "eslint --config ../../eslint.config.js .",
+    "test": "vitest run",
+    "validate": "tsx scripts/validate.ts",
+    "diag": "tsx scripts/diag.ts",
+    "diag:fatigue": "tsx scripts/diag-fatigue.ts",
+    "diag:bullpen": "tsx scripts/diag-bullpen.ts",
+    "diag:usage": "tsx scripts/diag-usage.ts",
+    "diag:clutch": "tsx scripts/diag-clutch.ts",
+    "diag:levels": "tsx scripts/diag-levels.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@hayakaze/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NPB ペナントレース GM シミュレーションの React アプリケーション",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint --config ../../eslint.config.js .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hayakaze/engine": "0.1.0",
+    "idb": "^8.0.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^7.18.4",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "fake-indexeddb": "^6.2.5",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.0"
+  }
+}

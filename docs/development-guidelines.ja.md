@@ -56,7 +56,7 @@
 | React コンポーネントとそのファイル | `PascalCase.tsx` | `PercentileBar.tsx` |
 | 画面フォルダ | `PascalCase/` に `index.tsx` | `ui/screens/PlayerPage/` |
 | 型とインターフェース | `PascalCase`、`I` 接頭辞なし | `Player`、`LeagueConfig` |
-| 関数と変数 | `camelCase`。関数は動詞から始める | `advanceOneDay`、`gamesPerTeam` |
+| 関数と変数 | `camelCase`。関数は動詞から始める | `advanceOneDay`、`gamesPerClub` |
 | 真偽値 | `is`/`has`/`can` 接頭辞 | `isSeasonOver`、`canRegister` |
 | 定数 | `UPPER_SNAKE_CASE` | `LEAGUE_AVERAGE`、`CLUTCH_GAIN_PER_10` |
 | 文字列リテラル union のメンバー | `UPPER_SNAKE_CASE` | `'EARLY_SUSTAINED'`、`'FOREIGN_EXEMPT'` |

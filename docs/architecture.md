@@ -31,7 +31,7 @@
 | Persistence | IndexedDB through the `idb` wrapper | Save files of tens of MB exceed `localStorage`; `idb` gives typed promises over the raw API |
 | Save compression | `CompressionStream` (gzip) for exported files | Built into browsers; no dependency. In-browser saves stay uncompressed for speed |
 | Schema validation | Zod | Validates imported JSON and loaded saves; produces path-qualified error messages for the import screen |
-| Worker bridge | Plain `postMessage` with a typed message union | Long simulations (`advanceTo`) run in a Web Worker; a library (Comlink) is unnecessary for a handful of message types |
+| Worker bridge | Plain `postMessage` with a typed message union | Long simulations (`advanceTo`) run in a Web Worker; a library (Comlink) is unnecessary for a handful of message types. In the initial implementation the state is serialised (save format) and sent to the worker and back; the worker does not hold state between commands |
 | Lint / format | ESLint (typescript-eslint) + Prettier | Enforces the engine restrictions below (no `Math.random`, no DOM globals) as lint rules |
 | UI tests | React Testing Library; Playwright smoke test later | Component behaviour; one end-to-end "new game → advance a week → save → load" check before release |
 | CI | GitHub Actions | typecheck, lint, test, build on every push; deploy to Pages from `main` |
@@ -126,7 +126,7 @@ Coding, naming, styling, testing and Git conventions are in `development-guideli
   the whole file with path-qualified messages.
 - All user- or file-supplied strings are rendered as text (React escaping); no `dangerouslySetInnerHTML`, no `eval`,
   no dynamic `Function`.
-- Content Security Policy in `index.html`: `default-src 'self'`; workers from `'self'`.
+- Content Security Policy `default-src 'self'; img-src 'self' data:` is injected into `index.html` by a Vite plugin **at build time only**. The dev server has no CSP because React Fast Refresh needs an inline script. The production build has no inline scripts or styles (Tailwind v4 emits a CSS file), so no `'unsafe-inline'` is needed.
 - Nothing is sent anywhere; there are no credentials.
 
 ### 4.5 Save format

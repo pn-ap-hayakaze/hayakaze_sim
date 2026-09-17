@@ -56,7 +56,7 @@
 | React components and their files | `PascalCase.tsx` | `PercentileBar.tsx` |
 | Screen folders | `PascalCase/` with `index.tsx` | `ui/screens/PlayerPage/` |
 | Types and interfaces | `PascalCase`, no `I` prefix | `Player`, `LeagueConfig` |
-| Functions and variables | `camelCase`, verb-first for functions | `advanceOneDay`, `gamesPerTeam` |
+| Functions and variables | `camelCase`, verb-first for functions | `advanceOneDay`, `gamesPerClub` |
 | Booleans | `is`/`has`/`can` prefix | `isSeasonOver`, `canRegister` |
 | Constants | `UPPER_SNAKE_CASE` | `LEAGUE_AVERAGE`, `CLUTCH_GAIN_PER_10` |
 | String-literal union members | `UPPER_SNAKE_CASE` | `'EARLY_SUSTAINED'`, `'FOREIGN_EXEMPT'` |

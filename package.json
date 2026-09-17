@@ -1,0 +1,29 @@
+{
+  "name": "hayakaze-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "NPB ペナントレース GM シミュレーション（npm workspaces のルート）",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && prettier --check \"packages/**/*.{ts,tsx,js,json,css}\"",
+    "test": "npm test --workspaces --if-present",
+    "build": "npm run build -w packages/app",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,js,json,css}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^5.0.1"
+  }
+}
